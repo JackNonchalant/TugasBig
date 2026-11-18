@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationItemController;
+use App\Http\Controllers\KatalogController;
 use App\Models\DonationItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,9 @@ Route::get('/', function () {
 
     return view('welcome', compact('recentItems'));
 })->name('home');
+
+// F-02: Katalog Barang Edukasi
+Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
 
 // Guest Authentication Routes
 Route::middleware('guest')->group(function () {

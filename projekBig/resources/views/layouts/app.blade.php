@@ -43,10 +43,13 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
+               <!-- Navigation Links -->
                 <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
                     <a href="{{ route('home') }}" class="text-slate-600 hover:text-emerald-600 transition-colors {{ request()->routeIs('home') ? 'text-emerald-600 font-semibold' : '' }}">
                         Beranda
+                    </a>
+                    <a href="{{ route('katalog.index') }}" class="text-slate-600 hover:text-emerald-600 transition-colors {{ request()->routeIs('katalog.*') ? 'text-emerald-600 font-semibold' : '' }}">
+                        Katalog Barang
                     </a>
 
                     @auth
