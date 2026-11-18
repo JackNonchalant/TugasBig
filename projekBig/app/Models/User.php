@@ -22,7 +22,40 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
+
+    /**
+     * Get donation items posted by this user.
+     */
+    public function donationItems()
+    {
+        return $this->hasMany(DonationItem::class, 'user_id');
+    }
+
+    /**
+     * Check if user is a donor.
+     */
+    public function isDonor(): bool
+    {
+        return $this->role === 'donor';
+    }
+
+    /**
+     * Check if user is a beneficiary.
+     */
+    public function isBeneficiary(): bool
+    {
+        return $this->role === 'beneficiary';
+    }
+
+    /**
+     * Check if user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 
     /**
      * The attributes that should be hidden for serialization.
