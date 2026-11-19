@@ -76,7 +76,7 @@ class DonationItemController extends Controller
             'kondisi' => $validated['kondisi'],
             'jumlah' => $validated['jumlah'],
             'foto' => $fotoPath,
-            'status' => 'tersedia',
+            'status' => 'Menunggu Verifikasi Transit',
         ]);
 
         return redirect()

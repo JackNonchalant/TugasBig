@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('kondisi');
             $table->unsignedInteger('jumlah')->default(1);
             $table->string('foto')->nullable();
-            $table->string('status')->default('tersedia'); // tersedia, diproses, disalurkan
+            $table->string('status')->default('Menunggu Verifikasi Transit'); // Menunggu Verifikasi Transit, tersedia, diproses, disalurkan
             $table->timestamps();
         });
     }
