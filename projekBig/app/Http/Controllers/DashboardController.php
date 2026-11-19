@@ -19,9 +19,10 @@ class DashboardController extends Controller
             ->paginate(10);
 
         $totalPosted = DonationItem::where('user_id', Auth::id())->count();
+        $totalMenungguVerifikasi = DonationItem::where('user_id', Auth::id())->where('status', 'Menunggu Verifikasi Transit')->count();
         $totalTersedia = DonationItem::where('user_id', Auth::id())->where('status', 'tersedia')->count();
 
-        return view('dashboards.donor', compact('items', 'totalPosted', 'totalTersedia'));
+        return view('dashboards.donor', compact('items', 'totalPosted', 'totalMenungguVerifikasi', 'totalTersedia'));
     }
 
     /**
@@ -44,6 +45,7 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_items' => DonationItem::count(),
+            'total_menunggu_verifikasi' => DonationItem::where('status', 'Menunggu Verifikasi Transit')->count(),
             'total_available' => DonationItem::where('status', 'tersedia')->count(),
             'total_users' => User::count(),
             'total_donors' => User::where('role', 'donor')->count(),

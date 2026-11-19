@@ -32,13 +32,13 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Donasi Diposting</div>
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Donasi</div>
                 <div class="text-3xl font-bold text-slate-900 mt-1">{{ $totalPosted }}</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
@@ -46,10 +46,21 @@
         </div>
         <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Barang Berstatus Tersedia</div>
+                <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Verifikasi Transit</div>
+                <div class="text-3xl font-bold text-amber-600 mt-1">{{ $totalMenungguVerifikasi }}</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Tersedia / Siap</div>
                 <div class="text-3xl font-bold text-emerald-600 mt-1">{{ $totalTersedia }}</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -129,7 +140,12 @@
                                 </td>
                                 <td class="px-6 py-4 font-bold text-slate-900">{{ $item->jumlah }}</td>
                                 <td class="px-6 py-4">
-                                    @if ($item->status === 'tersedia')
+                                    @if ($item->status === 'Menunggu Verifikasi Transit')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                            Menunggu Verifikasi Transit
+                                        </span>
+                                    @elseif ($item->status === 'tersedia')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                             Tersedia

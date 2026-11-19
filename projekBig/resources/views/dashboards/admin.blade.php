@@ -17,24 +17,29 @@
     </div>
 
     <!-- Statistics Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Barang</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ $stats['total_items'] }}</div>
             <div class="text-[11px] text-slate-400 mt-1">Seluruh donasi tercatat</div>
         </div>
         <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Barang Tersedia</div>
+            <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Verifikasi Transit</div>
+            <div class="text-3xl font-bold text-amber-600 mt-2">{{ $stats['total_menunggu_verifikasi'] }}</div>
+            <div class="text-[11px] text-amber-600/70 mt-1">Menunggu dicek</div>
+        </div>
+        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Barang Tersedia</div>
             <div class="text-3xl font-bold text-emerald-600 mt-2">{{ $stats['total_available'] }}</div>
             <div class="text-[11px] text-emerald-600/70 mt-1">Siap disalurkan</div>
         </div>
         <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Donatur</div>
+            <div class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Total Donatur</div>
             <div class="text-3xl font-bold text-purple-600 mt-2">{{ $stats['total_donors'] }}</div>
             <div class="text-[11px] text-slate-400 mt-1">Akun donatur aktif</div>
         </div>
         <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Penerima Manfaat</div>
+            <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Penerima Manfaat</div>
             <div class="text-3xl font-bold text-blue-600 mt-2">{{ $stats['total_beneficiaries'] }}</div>
             <div class="text-[11px] text-slate-400 mt-1">Akun penerima terdaftar</div>
         </div>
@@ -108,7 +113,12 @@
                                 </td>
                                 <td class="px-6 py-4 font-bold text-slate-900">{{ $item->jumlah }}</td>
                                 <td class="px-6 py-4">
-                                    @if ($item->status === 'tersedia')
+                                    @if ($item->status === 'Menunggu Verifikasi Transit')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                            Menunggu Verifikasi
+                                        </span>
+                                    @elseif ($item->status === 'tersedia')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                             Tersedia

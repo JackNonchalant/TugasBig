@@ -80,7 +80,7 @@ class DonationItemTest extends TestCase
             'kategori' => 'Buku Pelajaran & Referensi',
             'kondisi' => 'Sangat Baik',
             'jumlah' => 3,
-            'status' => 'tersedia',
+            'status' => 'Menunggu Verifikasi Transit',
         ]);
 
         $item = DonationItem::where('nama_barang', 'Kamus Lengkap Bahasa Indonesia')->first();
@@ -159,5 +159,60 @@ class DonationItemTest extends TestCase
             'kondisi',
             'jumlah',
         ]);
+    }
+
+    /**
+     * Acceptance Criteria:
+     * 1. Tetapkan status awal posting menjadi "Menunggu Verifikasi Transit".
+     * 2. Uji penyimpanan data ke database.
+     * 3. Uji validasi field wajib berdasarkan Acceptance Criteria.
+     */
+    public function test_initial_status_is_menunggu_verifikasi_transit_and_validates_required_fields(): void
+    {
+        // 1. Uji validasi field wajib
+        $emptyResponse = $this->actingAs($this->donor)->post('/items', []);
+        $emptyResponse->assertSessionHasErrors([
+            'nama_barang',
+            'kategori',
+            'deskripsi',
+            'kondisi',
+            'jumlah',
+        ]);
+
+        // 2. Uji validasi nilai tidak valid (jumlah < 1, kondisi tidak valid)
+        $invalidResponse = $this->actingAs($this->donor)->post('/items', [
+            'nama_barang' => 'Buku Matematika',
+            'kategori' => 'Buku Pelajaran & Referensi',
+            'deskripsi' => 'Buku bagus',
+            'kondisi' => 'Kondisi Rusak',
+            'jumlah' => 0,
+        ]);
+        $invalidResponse->assertSessionHasErrors(['kondisi', 'jumlah']);
+
+        // 3. Uji penyimpanan data lengkap: pastikan status awal otomatis "Menunggu Verifikasi Transit"
+        $validData = [
+            'nama_barang' => 'Ensiklopedia Sains Anak Bergambar',
+            'kategori' => 'Buku Pelajaran & Referensi',
+            'deskripsi' => '1 set ensiklopedia sains lengkap 5 jilid kondisi sangat bagus.',
+            'kondisi' => 'Sangat Baik',
+            'jumlah' => 1,
+        ];
+
+        $storeResponse = $this->actingAs($this->donor)->post('/items', $validData);
+
+        // Pastikan tersimpan dengan status 'Menunggu Verifikasi Transit'
+        $this->assertDatabaseHas('donation_items', [
+            'user_id' => $this->donor->id,
+            'nama_barang' => 'Ensiklopedia Sains Anak Bergambar',
+            'kategori' => 'Buku Pelajaran & Referensi',
+            'kondisi' => 'Sangat Baik',
+            'jumlah' => 1,
+            'status' => 'Menunggu Verifikasi Transit',
+        ]);
+
+        $item = DonationItem::where('nama_barang', 'Ensiklopedia Sains Anak Bergambar')->first();
+        $this->assertEquals('Menunggu Verifikasi Transit', $item->status);
+        $storeResponse->assertRedirect(route('items.show', $item->id));
+        $storeResponse->assertSessionHas('success');
     }
 }
