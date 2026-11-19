@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Sangat Baik',
                 'jumlah' => 5,
                 'foto' => null,
-                'status' => 'tersedia',
+                'status' => 'Menunggu Verifikasi Transit',
             ],
             [
                 'user_id' => $donor->id,
@@ -64,7 +64,7 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Baru',
                 'jumlah' => 3,
                 'foto' => null,
-                'status' => 'tersedia',
+                'status' => 'Menunggu Verifikasi Transit',
             ],
             [
                 'user_id' => $donor->id,

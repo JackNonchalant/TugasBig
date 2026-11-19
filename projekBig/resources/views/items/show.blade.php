@@ -70,18 +70,23 @@
                         </span>
 
                         <!-- Status Badge -->
-                        @if ($item->status === 'tersedia')
+                        @if ($item->status === 'Menunggu Verifikasi Transit')
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                Menunggu Verifikasi Transit
+                            </span>
+                        @elseif ($item->status === 'tersedia')
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200">
                                 <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
                                 Tersedia
                             </span>
                         @elseif ($item->status === 'diproses')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
                                 Sedang Diproses
                             </span>
                         @else
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                Sudah Disalurkan
+                                {{ $item->status }}
                             </span>
                         @endif
                     </div>
