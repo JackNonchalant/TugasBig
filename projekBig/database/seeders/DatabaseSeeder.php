@@ -54,6 +54,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Sangat Baik',
                 'jumlah' => 5,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
+                'jadwal_penyerahan' => now()->addDays(2)->format('Y-m-d'),
                 'status' => 'Menunggu Verifikasi Transit',
             ],
             [
@@ -64,6 +66,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Baru',
                 'jumlah' => 3,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Dago (Jl. Ir. H. Juanda No. 120, Bandung)',
+                'jadwal_penyerahan' => now()->addDays(3)->format('Y-m-d'),
                 'status' => 'Menunggu Verifikasi Transit',
             ],
             [
@@ -74,6 +78,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Layak Pakai',
                 'jumlah' => 2,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Buah Batu (Jl. Buah Batu No. 88, Bandung)',
+                'jadwal_penyerahan' => now()->subDay()->format('Y-m-d'),
                 'status' => 'tersedia',
             ],
             [
@@ -84,6 +90,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Baru',
                 'jumlah' => 10,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Sukajadi (Jl. Sukajadi No. 15, Bandung)',
+                'jadwal_penyerahan' => now()->subDays(2)->format('Y-m-d'),
                 'status' => 'tersedia',
             ],
         ];

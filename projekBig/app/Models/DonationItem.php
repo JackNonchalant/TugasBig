@@ -19,6 +19,8 @@ class DonationItem extends Model
         'kondisi',
         'jumlah',
         'foto',
+        'lokasi_posko',
+        'jadwal_penyerahan',
         'status',
     ];
 
@@ -26,6 +28,21 @@ class DonationItem extends Model
     {
         return [
             'jumlah' => 'integer',
+            'jadwal_penyerahan' => 'date',
+        ];
+    }
+
+    /**
+     * Daftar lokasi posko transit resmi PojokBerbagi yang dapat dipilih.
+     */
+    public static function getPoskoTransitList(): array
+    {
+        return [
+            'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
+            'Posko Transit Dago (Jl. Ir. H. Juanda No. 120, Bandung)',
+            'Posko Transit Buah Batu (Jl. Buah Batu No. 88, Bandung)',
+            'Posko Transit Sukajadi (Jl. Sukajadi No. 15, Bandung)',
+            'Posko Transit Cibiru (Jl. A.H. Nasution No. 102, Bandung)',
         ];
     }
 

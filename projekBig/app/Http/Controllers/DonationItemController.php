@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class DonationItemController extends Controller
@@ -33,7 +34,9 @@ class DonationItemController extends Controller
             'Layak Pakai',
         ];
 
-        return view('items.create', compact('kategoriList', 'kondisiList'));
+        $poskoTransitList = DonationItem::getPoskoTransitList();
+
+        return view('items.create', compact('kategoriList', 'kondisiList', 'poskoTransitList'));
     }
 
     /**
@@ -48,6 +51,8 @@ class DonationItemController extends Controller
             'deskripsi' => ['required', 'string'],
             'kondisi' => ['required', 'string', 'in:Baru,Sangat Baik,Layak Pakai'],
             'jumlah' => ['required', 'integer', 'min:1', 'max:10000'],
+            'lokasi_posko' => ['required', 'string', 'max:255', Rule::in(DonationItem::getPoskoTransitList())],
+            'jadwal_penyerahan' => ['required', 'date', 'after_or_equal:today'],
             'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
             'nama_barang.required' => 'Nama barang donasi wajib diisi.',
@@ -58,6 +63,11 @@ class DonationItemController extends Controller
             'jumlah.required' => 'Jumlah barang wajib diisi.',
             'jumlah.integer' => 'Jumlah barang harus berupa angka.',
             'jumlah.min' => 'Jumlah barang minimal 1 buah/paket.',
+            'lokasi_posko.required' => 'Lokasi posko transit wajib dipilih.',
+            'lokasi_posko.in' => 'Pilihan lokasi posko transit tidak valid.',
+            'jadwal_penyerahan.required' => 'Tanggal jadwal penyerahan barang wajib ditentukan.',
+            'jadwal_penyerahan.date' => 'Format tanggal jadwal penyerahan tidak valid.',
+            'jadwal_penyerahan.after_or_equal' => 'Jadwal penyerahan minimal hari ini atau tanggal setelahnya.',
             'foto.image' => 'File yang diunggah harus berupa gambar.',
             'foto.mimes' => 'Format foto harus berupa jpeg, jpg, png, atau webp.',
             'foto.max' => 'Ukuran foto maksimal adalah 2MB.',
@@ -75,6 +85,8 @@ class DonationItemController extends Controller
             'deskripsi' => $validated['deskripsi'],
             'kondisi' => $validated['kondisi'],
             'jumlah' => $validated['jumlah'],
+            'lokasi_posko' => $validated['lokasi_posko'],
+            'jadwal_penyerahan' => $validated['jadwal_penyerahan'],
             'foto' => $fotoPath,
             'status' => 'Menunggu Verifikasi Transit',
         ]);

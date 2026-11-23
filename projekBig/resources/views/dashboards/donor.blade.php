@@ -126,8 +126,12 @@
                                             <a href="{{ route('items.show', $item->id) }}" class="font-bold text-slate-900 hover:text-emerald-600 transition-colors">
                                                 {{ $item->nama_barang }}
                                             </a>
-                                            <div class="text-[11px] text-slate-400">
-                                                {{ $item->created_at->format('d M Y') }}
+                                            <div class="text-[11px] text-slate-400 flex items-center gap-2">
+                                                <span>Dibuat: {{ $item->created_at->format('d M Y') }}</span>
+                                                @if ($item->jadwal_penyerahan)
+                                                    <span>&bull;</span>
+                                                    <span class="text-amber-700 font-semibold">Serah Terima: {{ $item->jadwal_penyerahan->format('d M Y') }}</span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

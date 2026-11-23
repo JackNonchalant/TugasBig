@@ -98,6 +98,11 @@
                                             <div class="text-[11px] text-slate-400">
                                                 {{ $item->created_at->format('d M Y, H:i') }}
                                             </div>
+                                            @if ($item->lokasi_posko)
+                                                <div class="text-[10px] text-amber-700 font-medium truncate max-w-xs mt-0.5" title="{{ $item->lokasi_posko }}">
+                                                    📍 {{ $item->lokasi_posko }}
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
