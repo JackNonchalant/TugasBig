@@ -22,6 +22,7 @@ class DonationItem extends Model
         'lokasi_posko',
         'jadwal_penyerahan',
         'status',
+        'alasan_penolakan',
     ];
 
     protected function casts(): array

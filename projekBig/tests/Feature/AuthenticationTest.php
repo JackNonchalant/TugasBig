@@ -37,6 +37,11 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticatedAs($donor);
         $response->assertRedirect(route('donor.dashboard'));
+
+        $dashResponse = $this->actingAs($donor)->get(route('donor.dashboard'));
+        $dashResponse->assertStatus(200);
+        $dashResponse->assertSee('Dashboard Donatur');
+        $dashResponse->assertSee('Donatur Test');
     }
 
     /**
@@ -58,6 +63,11 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticatedAs($beneficiary);
         $response->assertRedirect(route('beneficiary.dashboard'));
+
+        $dashResponse = $this->actingAs($beneficiary)->get(route('beneficiary.dashboard'));
+        $dashResponse->assertStatus(200);
+        $dashResponse->assertSee('Dashboard Penerima');
+        $dashResponse->assertSee('Penerima Test');
     }
 
     /**

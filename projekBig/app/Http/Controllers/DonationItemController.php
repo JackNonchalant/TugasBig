@@ -103,6 +103,76 @@ class DonationItemController extends Controller
     {
         $item = DonationItem::with('donor')->findOrFail($id);
 
-        return view('items.show', compact('item'));
+        $relatedItems = DonationItem::where('id', '!=', $item->id)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('items.show', compact('item', 'relatedItems'));
+    }
+
+    /**
+     * Show form to submit request / claim for a donation item.
+     */
+    public function claimForm($id): View
+    {
+        $item = DonationItem::with('donor')->findOrFail($id);
+
+        return view('items.claim', compact('item'));
+    }
+
+    /**
+     * Submit request / claim for a donation item.
+     */
+    public function submitClaim(Request $request, $id): RedirectResponse
+    {
+        $item = DonationItem::findOrFail($id);
+
+        $request->validate([
+            'jumlah' => ['required', 'integer', 'min:1', 'max:' . max(1, $item->jumlah)],
+            'alasan_kebutuhan' => ['required', 'string', 'max:1000'],
+            'dokumen' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'catatan_tambahan' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        return redirect()->route('permintaan.index')
+            ->with('success', 'Permohonan barang ' . $item->nama_barang . ' berhasil dikirim ke posko transit!');
+    }
+
+    /**
+     * Verify donation item (Approve to available, or Reject with reason).
+     * Only accessible to Admin / Posko Transit verifier.
+     */
+    public function verifyItem(Request $request, $id): RedirectResponse
+    {
+        $item = DonationItem::findOrFail($id);
+
+        $action = $request->input('action');
+
+        if ($action === 'approve') {
+            $item->update([
+                'status' => 'tersedia',
+                'alasan_penolakan' => null,
+            ]);
+
+            return redirect()->back()->with('success', "Barang '{$item->nama_barang}' berhasil disetujui dan telah masuk ke katalog publik!");
+        }
+
+        if ($action === 'reject') {
+            $request->validate([
+                'rejection_reason' => ['required', 'string', 'max:1000'],
+            ], [
+                'rejection_reason.required' => 'Mohon isi alasan penolakan sebelum menolak barang.',
+            ]);
+
+            $item->update([
+                'status' => 'ditolak',
+                'alasan_penolakan' => $request->input('rejection_reason'),
+            ]);
+
+            return redirect()->back()->with('warning', "Barang '{$item->nama_barang}' ditolak dengan catatan verifikasi.");
+        }
+
+        return redirect()->back()->with('error', 'Aksi verifikasi tidak valid.');
     }
 }

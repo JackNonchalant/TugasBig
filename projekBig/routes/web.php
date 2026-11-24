@@ -63,13 +63,28 @@ Route::middleware('auth')->group(function () {
         Route::get('/beneficiary/dashboard', [DashboardController::class, 'beneficiary'])->name('beneficiary.dashboard');
     });
 
+    // Lacak Permintaan / Posko Transit (dapat diakses pengguna terautentikasi)
+    Route::get('/permintaan-saya', [DashboardController::class, 'permintaan'])->name('permintaan.index');
+
     // Admin Specific Routes
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+        Route::get('/admin/verifikasi', [DashboardController::class, 'verifikasi'])->name('admin.verifikasi');
+        Route::post('/admin/items/{id}/verify', [DonationItemController::class, 'verifyItem'])
+            ->whereNumber('id')
+            ->name('admin.items.verify');
     });
 
     // Detail barang donasi (dapat dilihat oleh pengguna terautentikasi)
     Route::get('/items/{id}', [DonationItemController::class, 'show'])
         ->whereNumber('id')
         ->name('items.show');
+
+    // Ajukan Permintaan / Klaim Barang Donasi
+    Route::get('/items/{id}/claim', [DonationItemController::class, 'claimForm'])
+        ->whereNumber('id')
+        ->name('items.claim');
+    Route::post('/items/{id}/claim', [DonationItemController::class, 'submitClaim'])
+        ->whereNumber('id')
+        ->name('items.claim.submit');
 });

@@ -249,4 +249,130 @@ class DonationItemTest extends TestCase
         $storeResponse->assertRedirect(route('items.show', $item->id));
         $storeResponse->assertSessionHas('success');
     }
+
+    /**
+     * Pengujian formulir pengajuan permintaan barang oleh penerima manfaat.
+     */
+    public function test_beneficiary_can_view_claim_form_and_submit_claim(): void
+    {
+        $item = DonationItem::create([
+            'user_id' => $this->donor->id,
+            'nama_barang' => 'Kamus Lengkap Bahasa Inggris',
+            'kategori' => 'Buku Pelajaran & Referensi',
+            'deskripsi' => 'Kamus tebal kondisi sangat baik.',
+            'kondisi' => 'Sangat Baik',
+            'jumlah' => 3,
+            'lokasi_posko' => 'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
+            'jadwal_penyerahan' => now()->addDays(2)->format('Y-m-d'),
+            'status' => 'tersedia',
+        ]);
+
+        $viewResponse = $this->actingAs($this->beneficiary)->get(route('items.claim', $item->id));
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertSee('Formulir Pengajuan Permintaan Barang');
+        $viewResponse->assertSee('Kamus Lengkap Bahasa Inggris');
+
+        $submitResponse = $this->actingAs($this->beneficiary)->post(route('items.claim.submit', $item->id), [
+            'jumlah' => 2,
+            'alasan_kebutuhan' => 'Untuk mendukung perpustakaan sekolah panti asuhan.',
+        ]);
+
+        $submitResponse->assertRedirect(route('permintaan.index'));
+        $submitResponse->assertSessionHas('success');
+    }
+
+    /**
+     * Verifikasi Posko Transit:
+     * - Admin dapat melihat antrean verifikasi barang donasi.
+     * - Admin dapat menyetujui barang menjadi 'tersedia'.
+     * - Admin dapat menolak barang donasi dengan alasan wajib.
+     */
+    public function test_admin_can_access_verification_dashboard(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('Verifikasi Barang Donasi');
+        $response->assertSee('Posko Transit • Kurasi Kualitas Barang');
+    }
+
+    public function test_admin_can_approve_donation_item(): void
+    {
+        $item = DonationItem::create([
+            'user_id' => $this->donor->id,
+            'nama_barang' => 'Seragam Pramuka Penggalang',
+            'kategori' => 'Seragam & Sepatu Sekolah',
+            'deskripsi' => 'Seragam bersih lengkap atribut.',
+            'kondisi' => 'Sangat Baik',
+            'jumlah' => 2,
+            'lokasi_posko' => 'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
+            'jadwal_penyerahan' => now()->addDay()->format('Y-m-d'),
+            'status' => 'Menunggu Verifikasi Transit',
+        ]);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.items.verify', $item->id), [
+            'action' => 'approve',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $item->refresh();
+        $this->assertEquals('tersedia', $item->status);
+    }
+
+    public function test_admin_can_reject_donation_item_with_mandatory_reason(): void
+    {
+        $item = DonationItem::create([
+            'user_id' => $this->donor->id,
+            'nama_barang' => 'Buku Cetak Matematika Sobek',
+            'kategori' => 'Buku Pelajaran & Referensi',
+            'deskripsi' => 'Buku bekas.',
+            'kondisi' => 'Layak Pakai',
+            'jumlah' => 1,
+            'lokasi_posko' => 'Posko Transit Dago (Jl. Ir. H. Juanda No. 120, Bandung)',
+            'jadwal_penyerahan' => now()->addDay()->format('Y-m-d'),
+            'status' => 'Menunggu Verifikasi Transit',
+        ]);
+
+        // Gagal jika alasan kosong
+        $failResponse = $this->actingAs($this->admin)->post(route('admin.items.verify', $item->id), [
+            'action' => 'reject',
+            'rejection_reason' => '',
+        ]);
+        $failResponse->assertSessionHasErrors('rejection_reason');
+
+        // Berhasil jika alasan diisi
+        $successResponse = $this->actingAs($this->admin)->post(route('admin.items.verify', $item->id), [
+            'action' => 'reject',
+            'rejection_reason' => 'Kondisi buku memiliki lembar halaman bab 3 dan 4 yang hilang.',
+        ]);
+
+        $successResponse->assertRedirect();
+        $successResponse->assertSessionHas('warning');
+
+        $item->refresh();
+        $this->assertEquals('ditolak', $item->status);
+        $this->assertEquals('Kondisi buku memiliki lembar halaman bab 3 dan 4 yang hilang.', $item->alasan_penolakan);
+    }
+
+    public function test_donor_cannot_verify_items(): void
+    {
+        $item = DonationItem::create([
+            'user_id' => $this->donor->id,
+            'nama_barang' => 'Tas Sekolah Eiger',
+            'kategori' => 'Tas & Perlengkapan Belajar',
+            'deskripsi' => 'Tas ransel kuat.',
+            'kondisi' => 'Sangat Baik',
+            'jumlah' => 1,
+            'lokasi_posko' => 'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
+            'jadwal_penyerahan' => now()->addDay()->format('Y-m-d'),
+            'status' => 'Menunggu Verifikasi Transit',
+        ]);
+
+        $response = $this->actingAs($this->donor)->post(route('admin.items.verify', $item->id), [
+            'action' => 'approve',
+        ]);
+
+        $response->assertStatus(403);
+    }
 }
