@@ -144,6 +144,10 @@
                 <span class="material-symbols-outlined mr-3 text-xl">menu_book</span>
                 Katalog Donasi
             </a>
+            <a class="flex items-center px-3 py-2.5 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="notifikasi" href="{{ route('notifikasi.index') }}">
+                <span class="material-symbols-outlined mr-3 text-xl">notifications</span>
+                Notifikasi
+            </a>
             <a class="flex items-center px-3 py-2.5 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="beranda" href="{{ route('home') }}">
                 <span class="material-symbols-outlined mr-3 text-xl">home</span>
                 Beranda Utama

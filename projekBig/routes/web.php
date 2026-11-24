@@ -66,6 +66,9 @@ Route::middleware('auth')->group(function () {
     // Lacak Permintaan / Posko Transit (dapat diakses pengguna terautentikasi)
     Route::get('/permintaan-saya', [DashboardController::class, 'permintaan'])->name('permintaan.index');
 
+    // Pusat Aktivitas & Notifikasi (dapat diakses semua pengguna terautentikasi)
+    Route::get('/notifikasi', [DashboardController::class, 'notifikasi'])->name('notifikasi.index');
+
     // Admin Specific Routes
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');

@@ -148,6 +148,9 @@
             <a class="flex items-center px-3 py-2.5 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" href="{{ route('beneficiary.dashboard') }}">
                 <span class="material-symbols-outlined mr-3 text-xl">volunteer_activism</span>Katalog Penerima
             </a>
+            <a class="flex items-center px-3 py-2.5 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" href="{{ route('notifikasi.index') }}">
+                <span class="material-symbols-outlined mr-3 text-xl">notifications</span>Notifikasi
+            </a>
         </nav>
 
         <div class="px-4 pt-4 border-t border-outline-variant/20">

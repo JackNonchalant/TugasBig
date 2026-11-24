@@ -220,4 +220,26 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertSessionHasErrors('email');
     }
+
+    public function test_authenticated_user_can_access_notifications_page(): void
+    {
+        $user = User::create([
+            'name' => 'User Notif Test',
+            'email' => 'usernotif@test.com',
+            'password' => Hash::make('password123'),
+            'role' => 'donor',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('notifikasi.index'));
+        $response->assertStatus(200);
+        $response->assertSee('Pusat Aktivitas');
+        $response->assertSee('Notifikasi');
+        $response->assertSee('Tandai semua telah dibaca');
+    }
+
+    public function test_unauthenticated_user_cannot_access_notifications_page(): void
+    {
+        $response = $this->get(route('notifikasi.index'));
+        $response->assertRedirect(route('login'));
+    }
 }

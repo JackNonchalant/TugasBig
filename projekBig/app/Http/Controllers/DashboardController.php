@@ -87,4 +87,19 @@ class DashboardController extends Controller
 
         return view('dashboards.verifikasi', compact('pendingItems', 'approvedItems', 'rejectedItems', 'stats'));
     }
+
+    /**
+     * Pusat Aktivitas & Notifikasi Pengguna.
+     */
+    public function notifikasi(): View
+    {
+        $user = Auth::user();
+
+        // Ambil data aktivitas donasi dan status posko
+        $myDonations = DonationItem::where('user_id', $user->id)->latest()->take(5)->get();
+        $recentTransitItems = DonationItem::latest()->take(4)->get();
+        $pendingTransitCount = DonationItem::where('status', 'Menunggu Verifikasi Transit')->count();
+
+        return view('dashboards.notifikasi', compact('user', 'myDonations', 'recentTransitItems', 'pendingTransitCount'));
+    }
 }
