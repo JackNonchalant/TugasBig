@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\DonationItemController;
 use App\Http\Controllers\KatalogController;
 use App\Models\DonationItem;
@@ -67,11 +66,6 @@ Route::middleware('auth')->group(function () {
     // Admin Specific Routes
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
-
-        // Kelola Pengguna (PBI-016, PBI-017, PBI-018)
-        Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-        Route::patch('/admin/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');
-        Route::patch('/admin/users/{user}/activate', [AdminUserController::class, 'activate'])->name('admin.users.activate');
     });
 
     // Detail barang donasi (dapat dilihat oleh pengguna terautentikasi)

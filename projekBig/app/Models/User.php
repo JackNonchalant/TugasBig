@@ -37,6 +37,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get notifications for this user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get unread notifications count.
+     */
+    public function unreadNotificationsCount(): int
+    {
+        return $this->notifications()->whereNull('read_at')->count();
+    }
+
+    /**
      * Check if user is a donor.
      */
     public function isDonor(): bool
