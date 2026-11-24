@@ -81,7 +81,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/',                        [DistributionController::class, 'store'])       ->name('store');
             Route::get('/{id}',                     [DistributionController::class, 'show'])        ->name('show');
             Route::get('/{id}/edit-status',         [DistributionController::class, 'editStatus'])  ->name('edit-status');
-            Route::post('/{id}/update-status',      [DistributionController::class, 'updateStatus'])->name('update-status');
+            Route::match(['post', 'put'], '/{id}/update-status', [DistributionController::class, 'updateStatus'])->name('update-status');
             Route::post('/{id}/upload-proof',       [DistributionController::class, 'uploadProof']) ->name('upload-proof');
             Route::delete('/{id}/proofs/{proofId}', [DistributionController::class, 'deleteProof']) ->name('delete-proof');
         });

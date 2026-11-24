@@ -56,9 +56,9 @@
                                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
                                 Buka Panel Admin
                             </a>
-                            <a href="{{ route('admin.distributions.index') }}"
+                            <a href="{{ route('katalog.index') }}"
                                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
-                                Kelola Penyaluran
+                                Lihat Katalog Kebutuhan
                             </a>
                         @endif
                     @else
