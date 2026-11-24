@@ -56,14 +56,18 @@
                     Dashboard
                 </a>
 
-                {{-- Barang Donasi --}}
-                <a href="{{ route('admin.dashboard') }}"
+                {{-- Penyaluran Barang --}}
+                <a href="{{ route('admin.distributions.index') }}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                          {{ request()->routeIs('admin.items.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                          {{ request()->routeIs('admin.distributions.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    Barang Donasi
+                    Penyaluran Barang
+                    @php $distMenunggu = \App\Models\Distribution::where('status','Menunggu Penyaluran')->count(); @endphp
+                    @if ($distMenunggu > 0)
+                        <span class="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1 text-[10px] font-bold text-white bg-amber-500 rounded-full">{{ $distMenunggu }}</span>
+                    @endif
                 </a>
 
                 <p class="px-3 pt-5 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Pengelolaan</p>

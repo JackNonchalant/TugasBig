@@ -71,9 +71,6 @@
                             <a href="{{ route('admin.dashboard') }}" class="text-slate-600 hover:text-emerald-600 transition-colors {{ request()->routeIs('admin.dashboard') ? 'text-emerald-600 font-semibold' : '' }}">
                                 Dashboard Admin
                             </a>
-                            <a href="{{ route('admin.distributions.index') }}" class="text-slate-600 hover:text-emerald-600 transition-colors {{ request()->routeIs('admin.distributions.*') ? 'text-emerald-600 font-semibold' : '' }}">
-                                Penyaluran
-                            </a>
                         @endif
 
                         {{-- Notifikasi Bell --}}
