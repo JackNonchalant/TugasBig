@@ -1,9 +1,10 @@
-@extends('layouts.app')
+@extends(auth()->check() && auth()->user()->isAdmin() ? 'layouts.admin' : 'layouts.app')
+@section('page-title', 'Detail Barang Donasi')
 
 @section('title', 'Detail Barang - ' . $item->nama_barang)
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-5xl mx-auto">
     <!-- Breadcrumb & Back Button -->
     <div class="flex items-center justify-between mb-6">
         <nav class="flex items-center gap-2 text-xs text-slate-500">

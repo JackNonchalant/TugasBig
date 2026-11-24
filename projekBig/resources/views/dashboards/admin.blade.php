@@ -198,7 +198,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @foreach ($items as $item)
+                        @foreach ($recentItems as $item)
                             <tr class="hover:bg-slate-50/60 transition-colors">
                                 <td class="px-6 py-4 font-mono text-xs text-slate-400">#{{ $item->id }}</td>
                                 <td class="px-6 py-4">
@@ -240,11 +240,7 @@
                                             Menunggu Verifikasi
                                         </span>
                                     @elseif ($item->status === 'tersedia')
-<<<<<<<<< Temporary merge branch 1
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
-=========
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-300">
->>>>>>>>> Temporary merge branch 2
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                             Tersedia
                                         </span>
@@ -280,12 +276,6 @@
                     </tbody>
                 </table>
             </div>
-
-            @if ($items->hasPages())
-                <div class="p-4 border-t border-slate-100">
-                    {{ $items->links() }}
-                </div>
-            @endif
         @endif
     </div>
 

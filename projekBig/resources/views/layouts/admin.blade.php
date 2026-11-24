@@ -87,6 +87,31 @@
                         <span class="ml-auto inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full">{{ $suspendedCount }}</span>
                     @endif
                 </a>
+
+                <p class="px-3 pt-5 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Lainnya</p>
+
+                {{-- Notifikasi --}}
+                <a href="{{ route('notifications.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                          {{ request()->routeIs('notifications.*') ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    Notifikasi
+                    @php $unreadNotif = \App\Models\Notification::where('user_id', auth()->id())->whereNull('read_at')->count(); @endphp
+                    @if ($unreadNotif > 0)
+                        <span class="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1 text-[10px] font-bold text-white bg-sky-500 rounded-full">{{ $unreadNotif }}</span>
+                    @endif
+                </a>
+
+                {{-- Katalog Publik --}}
+                <a href="{{ route('katalog.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    Katalog Barang
+                </a>
             </nav>
 
             {{-- User Info (bottom) --}}
