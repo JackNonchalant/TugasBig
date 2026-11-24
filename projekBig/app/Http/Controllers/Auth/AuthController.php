@@ -75,6 +75,22 @@ class AuthController extends Controller
      */
     public function register(Request $request): RedirectResponse
     {
+        if ($request->has('fullName') && !$request->filled('name')) {
+            $request->merge(['name' => $request->input('fullName')]);
+        }
+        if ($request->has('account_type') && !$request->filled('role')) {
+            $request->merge(['role' => $request->input('account_type')]);
+        }
+        if ($request->input('role') === 'donatur') {
+            $request->merge(['role' => 'donor']);
+        }
+        if ($request->input('role') === 'penerima') {
+            $request->merge(['role' => 'beneficiary']);
+        }
+        if ($request->has('confirmPassword') && !$request->filled('password_confirmation')) {
+            $request->merge(['password_confirmation' => $request->input('confirmPassword')]);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
