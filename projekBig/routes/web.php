@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\DonationItemController;
 use App\Http\Controllers\KatalogController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Models\DonationItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -68,22 +69,25 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
 
-        // PBI-013: Daftar & manajemen penyaluran barang
-        Route::get('/admin/distributions', [DistributionController::class, 'index'])->name('admin.distributions.index');
-        Route::get('/admin/distributions/create', [DistributionController::class, 'create'])->name('admin.distributions.create');
-        Route::post('/admin/distributions', [DistributionController::class, 'store'])->name('admin.distributions.store');
-        Route::get('/admin/distributions/{id}', [DistributionController::class, 'show'])->name('admin.distributions.show');
+        // Kelola Pengguna (PBI-016, PBI-017, PBI-018)
+        Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::patch('/admin/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');
+        Route::patch('/admin/users/{user}/activate', [AdminUserController::class, 'activate'])->name('admin.users.activate');
 
-        // PBI-013: Form & proses update status penyaluran
-        Route::get('/admin/distributions/{id}/update-status', [DistributionController::class, 'editStatus'])->name('admin.distributions.edit-status');
-        Route::put('/admin/distributions/{id}/update-status', [DistributionController::class, 'updateStatus'])->name('admin.distributions.update-status');
-
-        // PBI-014: Upload bukti foto serah terima
-        Route::post('/admin/distributions/{id}/upload-proof', [DistributionController::class, 'uploadProof'])->name('admin.distributions.upload-proof');
-        Route::delete('/admin/distributions/{id}/proof/{proofId}', [DistributionController::class, 'deleteProof'])->name('admin.distributions.delete-proof');
+        // Distribusi / Penyaluran Barang (PBI-013, PBI-014, PBI-015)
+        Route::prefix('admin/distributions')->name('admin.distributions.')->group(function () {
+            Route::get('/',                         [DistributionController::class, 'index'])       ->name('index');
+            Route::get('/create',                   [DistributionController::class, 'create'])      ->name('create');
+            Route::post('/',                        [DistributionController::class, 'store'])       ->name('store');
+            Route::get('/{id}',                     [DistributionController::class, 'show'])        ->name('show');
+            Route::get('/{id}/edit-status',         [DistributionController::class, 'editStatus'])  ->name('edit-status');
+            Route::post('/{id}/update-status',      [DistributionController::class, 'updateStatus'])->name('update-status');
+            Route::post('/{id}/upload-proof',       [DistributionController::class, 'uploadProof']) ->name('upload-proof');
+            Route::delete('/{id}/proofs/{proofId}', [DistributionController::class, 'deleteProof']) ->name('delete-proof');
+        });
     });
 
-    // Notifikasi (semua role yang terautentikasi)
+    // Notifikasi (semua role yang sudah login)
     Route::get('/notifications', [DistributionController::class, 'notifications'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [DistributionController::class, 'markNotificationRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [DistributionController::class, 'markAllNotificationsRead'])->name('notifications.read-all');
