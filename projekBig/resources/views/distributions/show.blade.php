@@ -1,9 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+@section('page-title', 'Detail Penyaluran')
 
 @section('title', 'Detail Penyaluran #' . $distribution->id)
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-7xl mx-auto">
     <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-xs text-slate-500 mb-6">
         <a href="{{ route('admin.distributions.index') }}" class="hover:text-emerald-600 transition-colors">Penyaluran</a>

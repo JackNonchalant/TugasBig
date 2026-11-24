@@ -61,9 +61,12 @@
                             <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('admin.dashboard') ? 'text-emerald-700 bg-emerald-50' : 'text-stone-600 hover:text-emerald-700 hover:bg-emerald-50/60' }}">
                                 Dashboard
                             </a>
-                            <a href="{{ route('admin.distributions.index') }}" class="text-slate-600 hover:text-emerald-600 transition-colors {{ request()->routeIs('admin.distributions.*') ? 'text-emerald-600 font-semibold' : '' }}">
+<<<<<<<<< Temporary merge branch 1
+=========
+                            <a href="{{ route('admin.distributions.index') }}" class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('admin.distributions.*') ? 'text-emerald-700 bg-emerald-50' : 'text-stone-600 hover:text-emerald-700 hover:bg-emerald-50/60' }}">
                                 Penyaluran
                             </a>
+>>>>>>>>> Temporary merge branch 2
                         @endif
                     @endauth
                 </nav>
