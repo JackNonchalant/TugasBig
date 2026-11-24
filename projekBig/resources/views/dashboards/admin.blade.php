@@ -1,51 +1,69 @@
-@extends('layouts.app')
+{{-- resources/views/dashboards/admin.blade.php --}}
+@extends('layouts.admin')
 
 @section('title', 'Dashboard Administrator')
+@section('page-title', 'Dashboard')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold uppercase tracking-wider mb-2">
-                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                Panel Administrator
-            </div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard Manajemen Sistem</h1>
-            <p class="text-xs text-slate-500 mt-1">Pantau seluruh aktivitas barang donasi, donatur, dan penerima manfaat PojokBerbagi</p>
+<div class="space-y-6">
+
+    {{-- Header --}}
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold uppercase tracking-wider mb-2">
+            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+            Panel Administrator
         </div>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Dashboard Manajemen Sistem</h1>
+        <p class="text-sm text-slate-500 mt-1">Pantau seluruh aktivitas barang donasi, donatur, dan penerima manfaat PojokBerbagi.</p>
     </div>
 
-    <!-- Statistics Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+    {{-- Statistics Grid --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Barang</div>
             <div class="text-3xl font-bold text-slate-900 mt-2">{{ $stats['total_items'] }}</div>
             <div class="text-[11px] text-slate-400 mt-1">Seluruh donasi tercatat</div>
         </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Verifikasi Transit</div>
             <div class="text-3xl font-bold text-amber-600 mt-2">{{ $stats['total_menunggu_verifikasi'] }}</div>
             <div class="text-[11px] text-amber-600/70 mt-1">Menunggu dicek</div>
         </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Barang Tersedia</div>
             <div class="text-3xl font-bold text-emerald-600 mt-2">{{ $stats['total_available'] }}</div>
             <div class="text-[11px] text-emerald-600/70 mt-1">Siap disalurkan</div>
         </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <div class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Total Donatur</div>
             <div class="text-3xl font-bold text-purple-600 mt-2">{{ $stats['total_donors'] }}</div>
             <div class="text-[11px] text-slate-400 mt-1">Akun donatur aktif</div>
         </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Penerima Manfaat</div>
             <div class="text-3xl font-bold text-blue-600 mt-2">{{ $stats['total_beneficiaries'] }}</div>
             <div class="text-[11px] text-slate-400 mt-1">Akun penerima terdaftar</div>
         </div>
     </div>
 
-    <!-- All Items Table -->
+    {{-- Quick Action: Kelola Pengguna --}}
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900">Pengelolaan Pengguna</h2>
+                <p class="text-sm text-slate-500 mt-0.5">Kelola akun donatur dan penerima manfaat terdaftar di sistem.</p>
+            </div>
+            <a href="{{ route('admin.users.index') }}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-emerald-600/20 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Kelola Pengguna
+            </a>
+        </div>
+    </div>
+
+    {{-- All Items Table --}}
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-6 border-b border-slate-100 flex items-center justify-between">
             <div>
@@ -130,10 +148,8 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a
-                                        href="{{ route('items.show', $item->id) }}"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors"
-                                    >
+                                    <a href="{{ route('items.show', $item->id) }}"
+                                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors">
                                         Lihat Detail
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

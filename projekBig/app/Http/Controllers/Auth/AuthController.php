@@ -41,10 +41,23 @@ class AuthController extends Controller
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
             /** @var User $user */
             $user = Auth::user();
+
+            // Blokir login jika akun suspended
+            if ($user->status_akun === 'suspended') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()
+                    ->withInput($request->only('email', 'remember'))
+                    ->withErrors([
+                        'email' => 'Akun Anda telah dinonaktifkan karena pelanggaran ketentuan layanan. Silakan hubungi tim admin untuk informasi lebih lanjut.',
+                    ]);
+            }
+
+            $request->session()->regenerate();
 
             return $this->redirectBasedOnRole($user)
                 ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
