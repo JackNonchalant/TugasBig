@@ -289,10 +289,18 @@ class DonationItemTest extends TestCase
      */
     public function test_admin_can_access_verification_dashboard(): void
     {
-        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+        $response = $this->actingAs($this->admin)->get(route('admin.verifikasi'));
         $response->assertStatus(200);
         $response->assertSee('Verifikasi Barang Donasi');
         $response->assertSee('Posko Transit • Kurasi Kualitas Barang');
+    }
+
+    public function test_admin_can_access_inventory_catalog_dashboard(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('Manajemen Katalog Barang');
+        $response->assertSee('Total di Katalog');
     }
 
     public function test_admin_can_approve_donation_item(): void

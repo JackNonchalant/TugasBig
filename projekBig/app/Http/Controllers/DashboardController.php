@@ -59,11 +59,30 @@ class DashboardController extends Controller
     }
 
     /**
-     * Admin Dashboard: all items, user counts, and monitoring.
+     * Admin Dashboard: Manajemen Katalog Barang & Posko Transit.
      */
     public function admin(): View
     {
-        return $this->verifikasi();
+        $items = DonationItem::with('donor')->latest()->paginate(15);
+
+        $totalKatalog = DonationItem::count();
+        $totalSiapKlaim = DonationItem::where('status', 'tersedia')->count();
+        $totalStokMenipis = DonationItem::where('status', 'tersedia')->where('jumlah', '<=', 2)->count();
+        $totalTersalurkan = DonationItem::whereIn('status', ['disalurkan', 'ditolak'])->count();
+
+        $stats = [
+            'total_items' => $totalKatalog,
+            'total_menunggu_verifikasi' => DonationItem::where('status', 'Menunggu Verifikasi Transit')->count(),
+            'total_available' => $totalSiapKlaim,
+            'total_rejected' => DonationItem::where('status', 'ditolak')->count(),
+            'total_users' => User::count(),
+            'total_donors' => User::where('role', 'donor')->count(),
+            'total_beneficiaries' => User::where('role', 'beneficiary')->count(),
+        ];
+
+        $poskoTransitList = DonationItem::getPoskoTransitList();
+
+        return view('dashboards.admin', compact('items', 'totalKatalog', 'totalSiapKlaim', 'totalStokMenipis', 'totalTersalurkan', 'stats', 'poskoTransitList'));
     }
 
     /**
