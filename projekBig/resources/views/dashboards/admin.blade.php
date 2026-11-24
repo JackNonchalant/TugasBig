@@ -14,6 +14,13 @@
             <h1 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard Manajemen Sistem</h1>
             <p class="text-xs text-slate-500 mt-1">Pantau seluruh aktivitas barang donasi, donatur, dan penerima manfaat PojokBerbagi</p>
         </div>
+        <a href="{{ route('admin.distributions.index') }}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 shadow-sm shadow-emerald-600/20 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            Kelola Penyaluran
+        </a>
     </div>
 
     <!-- Statistics Grid -->
@@ -42,6 +49,27 @@
             <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Penerima Manfaat</div>
             <div class="text-3xl font-bold text-blue-600 mt-2">{{ $stats['total_beneficiaries'] }}</div>
             <div class="text-[11px] text-slate-400 mt-1">Akun penerima terdaftar</div>
+        </div>
+    </div>
+
+    <!-- Distribution Statistics -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Penyaluran</div>
+            <div class="text-2xl font-bold text-slate-900 mt-2">{{ $stats['total_distributions'] ?? 0 }}</div>
+            <a href="{{ route('admin.distributions.index') }}" class="text-[11px] text-emerald-600 font-semibold hover:underline mt-1 inline-block">Lihat semua →</a>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm">
+            <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Menunggu Penyaluran</div>
+            <div class="text-2xl font-bold text-amber-600 mt-2">{{ $stats['distributions_menunggu'] ?? 0 }}</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-blue-200 shadow-sm">
+            <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Dalam Proses</div>
+            <div class="text-2xl font-bold text-blue-600 mt-2">{{ $stats['distributions_proses'] ?? 0 }}</div>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-emerald-200 shadow-sm">
+            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Sudah Disalurkan</div>
+            <div class="text-2xl font-bold text-emerald-600 mt-2">{{ $stats['distributions_selesai'] ?? 0 }}</div>
         </div>
     </div>
 
@@ -119,9 +147,19 @@
                                             Menunggu Verifikasi
                                         </span>
                                     @elseif ($item->status === 'tersedia')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-300">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                             Tersedia
+                                        </span>
+                                    @elseif ($item->status === 'Dalam Proses Penyaluran')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-300">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                            Dalam Proses
+                                        </span>
+                                    @elseif ($item->status === 'Disalurkan')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-300">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                                            Disalurkan
                                         </span>
                                     @else
                                         <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">

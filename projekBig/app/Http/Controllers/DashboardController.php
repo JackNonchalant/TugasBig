@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Distribution;
 use App\Models\DonationItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +51,11 @@ class DashboardController extends Controller
             'total_users' => User::count(),
             'total_donors' => User::where('role', 'donor')->count(),
             'total_beneficiaries' => User::where('role', 'beneficiary')->count(),
+            // Statistik distribusi
+            'total_distributions' => Distribution::count(),
+            'distributions_menunggu' => Distribution::where('status', 'Menunggu Penyaluran')->count(),
+            'distributions_proses' => Distribution::where('status', 'Dalam Proses Penyaluran')->count(),
+            'distributions_selesai' => Distribution::where('status', 'Disalurkan')->count(),
         ];
 
         $items = DonationItem::with('donor')
