@@ -89,7 +89,29 @@ Route::middleware(['auth', 'account.active'])->group(function () {
     // Admin Specific Routes
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+
+        // Kelola Pengguna (PBI-016, PBI-017, PBI-018)
+        Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::patch('/admin/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');
+        Route::patch('/admin/users/{user}/activate', [AdminUserController::class, 'activate'])->name('admin.users.activate');
+
+        // Distribusi / Penyaluran Barang (PBI-013, PBI-014, PBI-015)
+        Route::prefix('admin/distributions')->name('admin.distributions.')->group(function () {
+            Route::get('/',                         [DistributionController::class, 'index'])       ->name('index');
+            Route::get('/create',                   [DistributionController::class, 'create'])      ->name('create');
+            Route::post('/',                        [DistributionController::class, 'store'])       ->name('store');
+            Route::get('/{id}',                     [DistributionController::class, 'show'])        ->name('show');
+            Route::get('/{id}/edit-status',         [DistributionController::class, 'editStatus'])  ->name('edit-status');
+            Route::post('/{id}/update-status',      [DistributionController::class, 'updateStatus'])->name('update-status');
+            Route::post('/{id}/upload-proof',       [DistributionController::class, 'uploadProof']) ->name('upload-proof');
+            Route::delete('/{id}/proofs/{proofId}', [DistributionController::class, 'deleteProof']) ->name('delete-proof');
+        });
     });
+
+    // Notifikasi (semua role yang sudah login)
+    Route::get('/notifications', [DistributionController::class, 'notifications'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [DistributionController::class, 'markNotificationRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [DistributionController::class, 'markAllNotificationsRead'])->name('notifications.read-all');
 
     // Detail barang donasi (dapat dilihat oleh pengguna terautentikasi)
     Route::get('/items/{id}', [DonationItemController::class, 'show'])

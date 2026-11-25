@@ -73,28 +73,40 @@
     </div>
 </div>
 
-<!-- Features Section -->
-<div class="py-16 bg-slate-50 border-b border-slate-200/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-xl mx-auto mb-12">
-            <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">Tiga Peran Utama</h2>
-            <p class="text-2xl font-bold tracking-tight text-slate-900">Ekosistem Saling Bantu yang Aman & Terverifikasi</p>
-        </div>
+<main>
+{{-- ═════════════════════ HERO ═════════════════════ --}}
+<section class="relative">
+    <div class="mx-auto max-w-7xl px-5 pb-20 pt-12 sm:px-8 lg:pb-28 lg:pt-20">
+        <div class="grid items-center gap-14 lg:grid-cols-12 lg:gap-10">
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Donatur Card -->
-            <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4">
-                        1
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-2">Donatur</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">
-                        Unggah barang pendidikan yang masih layak pakai melalui form posting sederhana dan pantau status donasi Anda.
-                    </p>
-                </div>
-                <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] font-semibold text-emerald-600">
-                    Buku, Seragam, Alat Tulis & Belajar
+            {{-- Teks --}}
+            <div class="lg:col-span-6">
+                <p class="rise flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[.18em] text-ochre" style="--d:80ms">
+                    <span class="h-px w-9 bg-ochre"></span>
+                    Redistribusi perlengkapan sekolah
+                </p>
+
+                <h1 class="font-display mt-6 text-[clamp(3rem,7vw,5.9rem)] leading-[.98] tracking-[-.02em] text-ink">
+                    <span class="line"><span class="line-inner" style="--d:160ms">Dari rak bukumu,</span></span>
+                    <span class="line"><span class="line-inner" style="--d:260ms">ke meja belajar</span></span>
+                    <span class="line"><span class="line-inner" style="--d:360ms"><em class="text-ochre">anak lain.</em></span></span>
+                </h1>
+
+                <p class="rise mt-8 max-w-[34rem] text-[17px] leading-relaxed text-warm" style="--d:560ms">
+                    PojokBerbagi mempertemukan donatur dengan siswa yang membutuhkan buku pelajaran, seragam, dan alat tulis layak pakai. Setiap barang diperiksa Tim Posko Transit sebelum sampai ke tangan penerima.
+                </p>
+
+                <div class="rise mt-10 flex flex-wrap items-center gap-3" style="--d:680ms">
+                    <a href="{{ $cta[0][1] }}"
+                       class="group inline-flex items-center gap-2.5 rounded-xl bg-forest px-6 py-3.5 text-sm font-semibold text-paper transition duration-300 hover:bg-forest-soft active:scale-95">
+                        {{ $cta[0][0] }}
+                        <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                    </a>
+                    <a href="{{ $cta[1][1] }}"
+                       class="group inline-flex items-center gap-2.5 rounded-xl border border-stone-300 px-6 py-3.5 text-sm font-semibold text-ink transition duration-300 hover:border-forest hover:bg-stone-100/70 active:scale-95">
+                        {{ $cta[1][0] }}
+                        <svg class="h-4 w-4 text-warm transition duration-300 group-hover:translate-x-1 group-hover:text-forest" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                    </a>
                 </div>
             </div>
 

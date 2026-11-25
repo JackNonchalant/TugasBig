@@ -76,10 +76,10 @@
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach ($items as $item)
-                            <tr class="hover:bg-slate-50/60 transition-colors">
-                                <td class="px-6 py-4 font-mono text-xs text-slate-400">#{{ $item->id }}</td>
+                    <tbody class="divide-y divide-stone-200/80">
+                        @foreach ($recentItems as $item)
+                            <tr class="hover:bg-paper/70 transition-colors">
+                                <td class="px-6 py-4 font-mono text-xs text-stone-400">#{{ $item->id }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         @if ($item->foto)
@@ -119,9 +119,19 @@
                                             Menunggu Verifikasi
                                         </span>
                                     @elseif ($item->status === 'tersedia')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-forest border border-forest/20">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>
                                             Tersedia
+                                        </span>
+                                    @elseif ($item->status === 'Dalam Proses Penyaluran')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-900 border border-sky-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-sky-600 animate-pulse"></span>
+                                            Dalam Proses
+                                        </span>
+                                    @elseif ($item->status === 'Disalurkan')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-stone-100 text-ink border border-stone-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>
+                                            Disalurkan
                                         </span>
                                     @else
                                         <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
