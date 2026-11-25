@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DonationHistoryController;
 use App\Http\Controllers\DonationItemController;
 use App\Http\Controllers\KatalogController;
 use App\Models\DonationItem;
@@ -54,6 +55,7 @@ Route::middleware('auth')->group(function () {
     // Donor Specific Routes
     Route::middleware('role:donor')->group(function () {
         Route::get('/donor/dashboard', [DashboardController::class, 'donor'])->name('donor.dashboard');
+        Route::get('/donor/my-donations', [DonationHistoryController::class, 'index'])->name('donor.my-donations');
         Route::get('/items/create', [DonationItemController::class, 'create'])->name('items.create');
         Route::post('/items', [DonationItemController::class, 'store'])->name('items.store');
     });
@@ -72,4 +74,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/items/{id}', [DonationItemController::class, 'show'])
         ->whereNumber('id')
         ->name('items.show');
+
+    // Detail riwayat donasi (hanya pemilik transaksi atau admin)
+    Route::get('/donor/my-donations/{id}', [DonationHistoryController::class, 'show'])
+        ->whereNumber('id')
+        ->name('donor.my-donations.show');
 });

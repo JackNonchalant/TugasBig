@@ -57,6 +57,9 @@
                             <a href="{{ route('donor.dashboard') }}" class="text-slate-600 hover:text-emerald-600 transition-colors {{ request()->routeIs('donor.dashboard') ? 'text-emerald-600 font-semibold' : '' }}">
                                 Dashboard Donatur
                             </a>
+                            <a href="{{ route('donor.my-donations') }}" class="text-slate-600 hover:text-emerald-600 transition-colors {{ request()->routeIs('donor.my-donations') ? 'text-emerald-600 font-semibold' : '' }}">
+                                Riwayat Donasi
+                            </a>
                             <a href="{{ route('items.create') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors font-semibold">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

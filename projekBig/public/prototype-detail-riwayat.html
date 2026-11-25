@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype — Detail Riwayat Donasi | PojokBerbagi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.bunny.net" />
+  <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+    .fade-in {
+      animation: fadeIn 0.22s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 antialiased">
+
+  <!-- Top Navbar -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-slate-900">PojokBerbagi</span>
+          <span class="block text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">Prototype Interaktif</span>
+        </div>
+      </div>
+
+      <!-- Simulasi Hak Akses / Otorisasi -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <span class="hidden md:inline text-xs font-semibold text-slate-500">Simulasi Hak Akses:</span>
+        <select id="authSimulator"
+          class="px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-50 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+          <option value="owner">Pemilik Transaksi (Donatur A)</option>
+          <option value="admin">Pihak Berwenang (Admin Logistik)</option>
+          <option value="unauthorized">Pengguna Lain (Tidak Berwenang)</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Indikator Status Otorisasi Global -->
+  <div id="authBanner" class="border-b transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-2">
+        <span id="authDot" class="w-2 h-2 rounded-full"></span>
+        <span id="authLabel" class="font-semibold"></span>
+      </div>
+      <span id="authHint" class="text-slate-500"></span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ==================== VIEW 1: DAFTAR RIWAYAT DONASI ==================== -->
+    <section id="listView" class="fade-in">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Riwayat Donasi Saya</h1>
+          <p class="text-sm text-slate-500 mt-1">Klik <strong>Lihat Detail</strong> pada salah satu transaksi untuk meninjau penerima manfaat dan bukti serah terima.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="filterList('semua')" data-filter="semua" class="filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white shadow-sm cursor-pointer">Semua</button>
+          <button onclick="filterList('menunggu')" data-filter="menunggu" class="filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">Menunggu</button>
+          <button onclick="filterList('diproses')" data-filter="diproses" class="filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">Diproses</button>
+          <button onclick="filterList('selesai')" data-filter="selesai" class="filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">Selesai</button>
+        </div>
+      </div>
+
+      <!-- Desktop Table & Mobile Cards -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-wider border-b border-slate-100">
+              <tr>
+                <th class="px-6 py-4">ID & Nama Barang</th>
+                <th class="px-6 py-4 hidden sm:table-cell">Kategori</th>
+                <th class="px-6 py-4">Tanggal Donasi</th>
+                <th class="px-6 py-4">Status Penyaluran</th>
+                <th class="px-6 py-4 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="donationTableBody" class="divide-y divide-slate-100">
+              <!-- Diisi dinamis oleh JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: DETAIL RIWAYAT DONASI ==================== -->
+    <section id="detailView" class="hidden fade-in">
+      <!-- Tombol Kembali -->
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <button onclick="backToList()"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-100 shadow-sm transition-all cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Kembali ke Riwayat Donasi
+        </button>
+
+        <div id="detailAuthBadge"></div>
+      </div>
+
+      <!-- Kontainer Utama Detail (atau Pesan Pembatasan Akses) -->
+      <div id="detailContainer"></div>
+    </section>
+
+  </main>
+
+  <!-- Modal Lightbox Preview Foto/Dokumen -->
+  <div id="previewModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm items-center justify-center p-4" onclick="closePreview()">
+    <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl fade-in" onclick="event.stopPropagation()">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 id="previewTitle" class="font-bold text-slate-900 text-sm">Preview Bukti Penerimaan</h3>
+        <button onclick="closePreview()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="previewBody" class="p-6 bg-slate-50 flex flex-col items-center justify-center"></div>
+    </div>
+  </div>
+
+  <footer class="mt-auto bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    &copy; 2026 <strong>PojokBerbagi</strong> — Prototype Interaktif Detail Riwayat Donasi
+  </footer>
+
+  <script>
+    // Dataset Simulasi Transaksi Donasi
+    const donations = [
+      {
+        id: 'DON-2026-0041',
+        ownerId: 'owner',
+        namaBarang: 'Paket 15 Buku Ensiklopedia Sains Anak',
+        kategori: 'Buku Pelajaran & Referensi',
+        kondisi: 'Sangat Baik',
+        jumlah: '15 Buku',
+        tanggal: '22 Nov 2026, 14:20 WIB',
+        status: 'selesai',
+        statusLabel: 'Selesai Disalurkan',
+        deskripsi: 'Kumpulan buku ensiklopedia bergambar untuk siswa SD kelas 4–6, seluruh halaman masih utuh dan bersih.',
+        penerima: {
+          namaLembaga: 'Taman Baca Harapan Bangsa',
+          penanggungJawab: 'Ibu Siti Aminah (Koordinator)',
+          alamat: 'Jl. Melati No. 18, Kec. Sukajadi, Bandung',
+          tanggalDiterima: '25 Nov 2026, 10:15 WIB',
+          catatan: 'Buku sudah diterima lengkap dan langsung ditempatkan di rak baca anak.'
+        },
+        bukti: {
+          fotoLabel: 'Foto Serah Terima Barang (JPG)',
+          dokumenLabel: 'Berita Acara Serah Terima #BAST-0041 (PDF)',
+          nomorBast: 'BAST/PB/2026/11/0041',
+          petugas: 'Rizky Pratama (Kurir Logistik PojokBerbagi)'
+        }
+      },
+      {
+        id: 'DON-2026-0038',
+        ownerId: 'owner',
+        namaBarang: 'Laptop Bekas Layak Pakai (Core i3, RAM 8GB)',
+        kategori: 'Perangkat Elektronik & Belajar',
+        kondisi: 'Layak Pakai',
+        jumlah: '1 Unit',
+        tanggal: '19 Nov 2026, 09:45 WIB',
+        status: 'diproses',
+        statusLabel: 'Diproses / Dalam Pengiriman',
+        deskripsi: 'Laptop lengkap dengan charger original dan tas pelindung, baterai tahan sekitar 3 jam.',
+        penerima: {
+          namaLembaga: 'PKBM Cerdas Mandiri',
+          penanggungJawab: 'Bapak Hendra Wijaya',
+          alamat: 'Jl. Kenanga Raya No. 4, Cimahi',
+          tanggalDiterima: 'Estimasi tiba 26 Nov 2026',
+          catatan: 'Sedang dalam perjalanan oleh tim logistik menuju lokasi PKBM.'
+        },
+        bukti: null
+      },
+      {
+        id: 'DON-2026-0035',
+        ownerId: 'owner',
+        namaBarang: 'Tas Ransel & Alat Tulis Lengkap',
+        kategori: 'Tas & Perlengkapan Belajar',
+        kondisi: 'Baru',
+        jumlah: '5 Paket',
+        tanggal: '15 Nov 2026, 16:10 WIB',
+        status: 'menunggu',
+        statusLabel: 'Menunggu Verifikasi Transit',
+        deskripsi: '5 tas ransel baru berisi buku tulis, pensil, penghapus, dan penggaris untuk siswa SD.',
+        penerima: null,
+        bukti: null
+      }
+    ];
+
+    let currentRole = 'owner';
+    let currentFilter = 'semua';
+    let activeDonationId = null;
+
+    const statusBadgeMap = {
+      selesai: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      diproses: 'bg-blue-50 text-blue-700 border-blue-200',
+      menunggu: 'bg-amber-50 text-amber-700 border-amber-200'
+    };
+
+    const statusDotMap = {
+      selesai: 'bg-emerald-500',
+      diproses: 'bg-blue-500',
+      menunggu: 'bg-amber-500'
+    };
+
+    function updateAuthBanner() {
+      const banner = document.getElementById('authBanner');
+      const dot = document.getElementById('authDot');
+      const label = document.getElementById('authLabel');
+      const hint = document.getElementById('authHint');
+
+      if (currentRole === 'owner') {
+        banner.className = 'border-b bg-emerald-50/70 border-emerald-200 text-emerald-900';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        label.textContent = 'Status Hak Akses: Valid — Pemilik Transaksi (Donatur A)';
+        hint.textContent = 'Anda berhak melihat seluruh detail transaksi dan bukti serah terima milik Anda.';
+      } else if (currentRole === 'admin') {
+        banner.className = 'border-b bg-blue-50/70 border-blue-200 text-blue-900';
+        dot.className = 'w-2 h-2 rounded-full bg-blue-500';
+        label.textContent = 'Status Hak Akses: Valid — Pihak Berwenang (Admin Logistik)';
+        hint.textContent = 'Akses audit diizinkan untuk keperluan verifikasi dan monitoring penyaluran.';
+      } else {
+        banner.className = 'border-b bg-rose-50/80 border-rose-200 text-rose-900';
+        dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        label.textContent = 'Status Hak Akses: Tidak Berwenang (Pengguna Lain / 403 Forbidden)';
+        hint.textContent = 'Simulasi pengguna lain yang mencoba membuka detail transaksi bukan miliknya.';
+      }
+    }
+
+    function filterList(status) {
+      currentFilter = status;
+      document.querySelectorAll('.filter-btn').forEach((btn) => {
+        if (btn.dataset.filter === status) {
+          btn.className = 'filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white shadow-sm cursor-pointer';
+        } else {
+          btn.className = 'filter-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer';
+        }
+      });
+      renderList();
+    }
+
+    function renderList() {
+      const tbody = document.getElementById('donationTableBody');
+      const filtered = currentFilter === 'semua'
+        ? donations
+        : donations.filter((d) => d.status === currentFilter);
+
+      tbody.innerHTML = filtered.map((item) => `
+        <tr class="hover:bg-slate-50/70 transition-colors">
+          <td class="px-6 py-4">
+            <div class="text-[11px] font-semibold text-slate-400">${item.id}</div>
+            <div class="font-bold text-slate-900 mt-0.5">${item.namaBarang}</div>
+          </td>
+          <td class="px-6 py-4 text-xs hidden sm:table-cell">${item.kategori}</td>
+          <td class="px-6 py-4 text-xs sm:text-sm text-slate-500">${item.tanggal}</td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadgeMap[item.status]}">
+              <span class="w-1.5 h-1.5 rounded-full ${statusDotMap[item.status]}"></span>
+              ${item.statusLabel}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <button onclick="openDetail('${item.id}')"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white font-semibold text-xs transition-all cursor-pointer">
+              Lihat Detail
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openDetail(id) {
+      activeDonationId = id;
+      document.getElementById('listView').classList.add('hidden');
+      document.getElementById('detailView').classList.remove('hidden');
+      renderDetail();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function backToList() {
+      activeDonationId = null;
+      document.getElementById('detailView').classList.add('hidden');
+      document.getElementById('listView').classList.remove('hidden');
+    }
+
+    function renderDetail() {
+      const item = donations.find((d) => d.id === activeDonationId);
+      const container = document.getElementById('detailContainer');
+      const authBadge = document.getElementById('detailAuthBadge');
+
+      if (!item) return;
+
+      // Cek Simulasi Hak Akses
+      if (currentRole === 'unauthorized') {
+        authBadge.innerHTML = `
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Otorisasi Ditolak (403)
+          </span>
+        `;
+
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl border border-rose-200 shadow-sm p-10 sm:p-14 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center mb-4">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+              </svg>
+            </div>
+            <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold mb-3">HTTP 403 — Forbidden</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Akses ke Detail Transaksi Dibatasi</h2>
+            <p class="text-sm text-slate-600 max-w-lg mx-auto mt-2 leading-relaxed">
+              Anda tidak memiliki hak akses untuk melihat detail transaksi <strong>${item.id}</strong>. Informasi donatur, data penerima manfaat, dan bukti serah terima hanya dapat diakses oleh pemilik transaksi atau pihak berwenang.
+            </p>
+            <div class="mt-6 flex flex-wrap justify-center gap-3">
+              <button onclick="backToList()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm cursor-pointer">
+                Kembali ke Riwayat Donasi
+              </button>
+              <button onclick="switchToOwner()" class="px-5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-sm cursor-pointer">
+                Simulasikan Login sebagai Pemilik
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Hak Akses Valid (Owner atau Admin)
+      authBadge.innerHTML = currentRole === 'owner'
+        ? `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">✓ Akses Valid: Pemilik Transaksi</span>`
+        : `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold">✓ Akses Valid: Pihak Berwenang (Admin)</span>`;
+
+      const penerimaHtml = item.penerima
+        ? `
+          <div class="space-y-3 text-sm">
+            <div>
+              <div class="text-xs text-slate-400 font-medium">Lembaga / Penerima Manfaat</div>
+              <div class="font-bold text-slate-900 mt-0.5">${item.penerima.namaLembaga}</div>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 font-medium">Penanggung Jawab</div>
+              <div class="font-medium text-slate-700 mt-0.5">${item.penerima.penanggungJawab}</div>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 font-medium">Alamat Penyaluran</div>
+              <div class="text-slate-600 mt-0.5">${item.penerima.alamat}</div>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 font-medium">Waktu Penerimaan</div>
+              <div class="font-semibold text-emerald-700 mt-0.5">${item.penerima.tanggalDiterima}</div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600">
+              <strong>Catatan:</strong> ${item.penerima.catatan}
+            </div>
+          </div>
+        `
+        : `
+          <div class="p-6 rounded-xl bg-amber-50/60 border border-dashed border-amber-200 text-center">
+            <p class="text-sm font-semibold text-amber-800">Penerima Manfaat Belum Ditentukan</p>
+            <p class="text-xs text-amber-700 mt-1">Barang masih dalam tahap verifikasi transit sebelum dialokasikan ke penerima manfaat.</p>
+          </div>
+        `;
+
+      const buktiHtml = item.bukti
+        ? `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Card Preview Foto -->
+            <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 flex flex-col justify-between">
+              <div class="aspect-video rounded-xl bg-gradient-to-br from-emerald-100 to-teal-50 border border-emerald-200 flex flex-col items-center justify-center text-emerald-700 mb-3">
+                <svg class="w-10 h-10 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-xs font-semibold">Foto Dokumentasi Penyerahan</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold text-slate-700 truncate">${item.bukti.fotoLabel}</span>
+                <button onclick="openPreview('foto', '${item.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer shrink-0">
+                  Preview Foto
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Preview Dokumen BAST -->
+            <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 flex flex-col justify-between">
+              <div class="aspect-video rounded-xl bg-white border border-slate-200 flex flex-col items-center justify-center text-slate-600 mb-3 p-4 text-center">
+                <svg class="w-10 h-10 text-blue-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="text-xs font-bold text-slate-800">${item.bukti.nomorBast}</span>
+                <span class="text-[11px] text-slate-400 mt-0.5">Petugas: ${item.bukti.petugas}</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold text-slate-700 truncate">${item.bukti.dokumenLabel}</span>
+                <button onclick="openPreview('dokumen', '${item.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer shrink-0">
+                  Preview Dokumen
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+        : `
+          <div class="p-6 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center">
+            <p class="text-sm font-semibold text-slate-700">Bukti Penerimaan Belum Tersedia</p>
+            <p class="text-xs text-slate-500 mt-1">Foto serah terima dan dokumen BAST akan diunggah setelah barang selesai diterima oleh penerima manfaat.</p>
+          </div>
+        `;
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <!-- Header Card Ringkasan -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 border-b border-slate-100">
+              <div>
+                <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">${item.id}</span>
+                <h1 class="text-2xl font-extrabold text-slate-900 mt-1">${item.namaBarang}</h1>
+                <p class="text-xs text-slate-500 mt-1">Didonasikan pada ${item.tanggal}</p>
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border ${statusBadgeMap[item.status]} self-start">
+                <span class="w-2 h-2 rounded-full ${statusDotMap[item.status]}"></span>
+                ${item.statusLabel}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 py-5 border-b border-slate-100 text-sm">
+              <div>
+                <div class="text-xs text-slate-400">Kategori</div>
+                <div class="font-semibold text-slate-800 mt-0.5">${item.kategori}</div>
+              </div>
+              <div>
+                <div class="text-xs text-slate-400">Kondisi Barang</div>
+                <div class="font-semibold text-slate-800 mt-0.5">${item.kondisi}</div>
+              </div>
+              <div>
+                <div class="text-xs text-slate-400">Jumlah Unit</div>
+                <div class="font-semibold text-slate-800 mt-0.5">${item.jumlah}</div>
+              </div>
+            </div>
+
+            <div class="pt-5">
+              <div class="text-xs text-slate-400 mb-1">Deskripsi Barang</div>
+              <p class="text-sm text-slate-700 leading-relaxed">${item.deskripsi}</p>
+            </div>
+          </div>
+
+          <!-- Grid 2 Kolom: Data Penerima Manfaat & Bukti Penerimaan -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+              <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </span>
+                Data Penerima Manfaat
+              </h2>
+              ${penerimaHtml}
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+              <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                Bukti Penerimaan & Serah Terima
+              </h2>
+              ${buktiHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openPreview(type, id) {
+      const item = donations.find((d) => d.id === id);
+      const modal = document.getElementById('previewModal');
+      const title = document.getElementById('previewTitle');
+      const body = document.getElementById('previewBody');
+
+      if (type === 'foto') {
+        title.textContent = `Preview Foto Serah Terima — ${item.id}`;
+        body.innerHTML = `
+          <div class="w-full rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-10 text-center shadow-inner">
+            <svg class="w-16 h-16 mx-auto mb-3 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <p class="font-bold text-lg">${item.namaBarang}</p>
+            <p class="text-emerald-100 text-xs mt-1">Diterima oleh ${item.penerima.namaLembaga} pada ${item.penerima.tanggalDiterima}</p>
+          </div>
+        `;
+      } else {
+        title.textContent = `Preview Dokumen BAST — ${item.bukti.nomorBast}`;
+        body.innerHTML = `
+          <div class="w-full bg-white border border-slate-200 rounded-xl p-6 text-left text-xs text-slate-700 space-y-3 shadow-sm">
+            <div class="border-b border-slate-200 pb-3 flex justify-between items-center">
+              <strong class="text-sm text-slate-900">BERITA ACARA SERAH TERIMA BARANG</strong>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-bold">TERVERIFIKASI</span>
+            </div>
+            <p><strong>No. Dokumen:</strong> ${item.bukti.nomorBast}</p>
+            <p><strong>Barang:</strong> ${item.namaBarang} (${item.jumlah})</p>
+            <p><strong>Penerima:</strong> ${item.penerima.namaLembaga} (${item.penerima.penanggungJawab})</p>
+            <p><strong>Petugas Penyerah:</strong> ${item.bukti.petugas}</p>
+            <p><strong>Tanggal Sah:</strong> ${item.penerima.tanggalDiterima}</p>
+          </div>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closePreview() {
+      const modal = document.getElementById('previewModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function switchToOwner() {
+      currentRole = 'owner';
+      document.getElementById('authSimulator').value = 'owner';
+      updateAuthBanner();
+      renderDetail();
+    }
+
+    document.getElementById('authSimulator').addEventListener('change', (e) => {
+      currentRole = e.target.value;
+      updateAuthBanner();
+      if (activeDonationId) renderDetail();
+    });
+
+    // Inisialisasi awal
+    updateAuthBanner();
+    renderList();
+  </script>
+</body>
+</html>

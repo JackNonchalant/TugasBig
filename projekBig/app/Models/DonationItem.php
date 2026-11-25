@@ -20,12 +20,20 @@ class DonationItem extends Model
         'jumlah',
         'foto',
         'status',
+        'recipient_name',
+        'recipient_contact',
+        'recipient_address',
+        'received_at',
+        'receipt_photo',
+        'receipt_document',
+        'distribution_notes',
     ];
 
     protected function casts(): array
     {
         return [
             'jumlah' => 'integer',
+            'received_at' => 'datetime',
         ];
     }
 
