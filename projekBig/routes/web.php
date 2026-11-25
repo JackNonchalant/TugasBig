@@ -24,7 +24,20 @@ Route::get('/', function () {
         ->take(6)
         ->get();
 
-    return view('welcome', compact('recentItems'));
+    // Metrik dihitung dari data nyata platform (satuan konsisten: unit & akun).
+    $metrics = [
+        'units_total'     => (int) DonationItem::sum('jumlah'),
+        'units_delivered' => (int) DonationItem::where('status', 'Disalurkan')->sum('jumlah'),
+        'donors'          => \App\Models\User::where('role', 'donor')->count(),
+        'beneficiaries'   => \App\Models\User::where('role', 'beneficiary')->count(),
+    ];
+
+    // Penyaluran terbaru untuk kartu status (tanpa data pribadi penerima).
+    $latestDistribution = \App\Models\Distribution::with('donationItem')
+        ->latest('updated_at')
+        ->first();
+
+    return view('welcome', compact('recentItems', 'metrics', 'latestDistribution'));
 })->name('home');
 
 // F-02: Katalog Barang Edukasi
@@ -40,8 +53,10 @@ Route::middleware('guest')->group(function () {
 });
 
 // Authenticated Routes
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::middleware(['auth', 'account.active'])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->withoutMiddleware('account.active')
+        ->name('logout');
 
     // Central dashboard redirector
     Route::get('/dashboard', function () {

@@ -1,140 +1,254 @@
-@extends('layouts.app')
+@php
+    // ── CTA mengikuti status login ─────────────────────────────────────
+    $katalog = route('katalog.index');
+    $user    = auth()->user();
 
-@section('title', 'Platform Donasi Perlengkapan Pendidikan')
+    $cta = match (true) {
+        ! $user               => [['Mulai berbagi', route('register')],            ['Lihat katalog kebutuhan', $katalog]],
+        $user->isAdmin()      => [['Buka Panel Admin', route('admin.dashboard')],  ['Lihat katalog kebutuhan', $katalog]],
+        $user->isDonor()      => [['Donasikan barang', route('items.create')],     ['Lihat katalog kebutuhan', $katalog]],
+        default               => [['Lihat katalog kebutuhan', $katalog],           ['Dashboard saya', route('beneficiary.dashboard')]],
+    };
 
-@section('content')
+    $dashboardUrl = match (true) {
+        ! $user          => null,
+        $user->isAdmin() => route('admin.dashboard'),
+        $user->isDonor() => route('donor.dashboard'),
+        default          => route('beneficiary.dashboard'),
+    };
 
-{{-- ═══════════════════════════════════════════════════════
-     HERO SECTION — Split Layout (60/40)
-     Warm off-white background, editorial typography
-     ═══════════════════════════════════════════════════════ --}}
-<section class="relative overflow-hidden" style="background: linear-gradient(170deg, #FAF9F6 0%, #f0ece4 100%);">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16 items-center">
+    // ── Kartu status distribusi (data nyata, fallback contoh) ──────────
+    $stepMap  = ['Menunggu Penyaluran' => 1, 'Dalam Proses Penyaluran' => 2, 'Disalurkan' => 3];
+    $isSample = ! $latestDistribution || ! $latestDistribution->donationItem;
 
-            {{-- LEFT: Text (≈60%) --}}
-            <div class="lg:col-span-3">
-                {{-- Editorial label — not a stiff pill badge --}}
-                <p class="text-sm font-semibold tracking-wide text-amber-700 mb-5 flex items-center gap-2">
-                    <span class="inline-block w-8 h-px bg-amber-600"></span>
-                    Gerakan Berbagi Perlengkapan Pendidikan
+    if ($isSample) {
+        $live = [
+            'nama'   => 'Paket buku tematik SD kelas 4–6',
+            'meta'   => 'Buku Pelajaran · 12 unit',
+            'step'   => 2,
+            'waktu'  => 'contoh alur',
+        ];
+    } else {
+        $it   = $latestDistribution->donationItem;
+        $live = [
+            'nama'   => $it->nama_barang,
+            'meta'   => $it->kategori . ' · ' . $it->jumlah . ' unit',
+            'step'   => $stepMap[$latestDistribution->status] ?? 1,
+            'waktu'  => $latestDistribution->updated_at->diffForHumans(),
+        ];
+    }
+    $stepLabels = ['Menunggu', 'Diproses', 'Disalurkan'];
+
+    // ── Foto editorial (Unsplash, hotlink — ganti dengan dokumentasi asli) ─
+    $img = fn (string $id, int $w = 900) => "https://images.unsplash.com/photo-{$id}?auto=format&fit=crop&w={$w}&q=75";
+
+    $metricList = [
+        ['n' => $metrics['units_total'],     'label' => 'Unit barang tercatat',   'note' => 'buku, seragam, alat tulis, dan perlengkapan lain'],
+        ['n' => $metrics['units_delivered'], 'label' => 'Unit sudah disalurkan',  'note' => 'dengan bukti serah terima'],
+        ['n' => $metrics['donors'],          'label' => 'Donatur terdaftar',      'note' => 'akun donatur di platform'],
+        ['n' => $metrics['beneficiaries'],   'label' => 'Penerima manfaat',       'note' => 'akun penerima terverifikasi'],
+    ];
+@endphp
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#FAF9F6">
+    <meta name="description" content="PojokBerbagi menghubungkan donatur dengan siswa yang membutuhkan buku, seragam, dan alat tulis layak pakai — diperiksa Tim Posko Transit, disalurkan dengan bukti serah terima.">
+    <title>PojokBerbagi — Dari rak bukumu, ke meja belajar anak lain</title>
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700|instrument-serif:400,400i&display=swap" rel="stylesheet">
+
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
+
+    <style>
+        :root { --ease: cubic-bezier(0.16, 1, 0.3, 1); }
+        body  { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
+        .font-display { font-family: 'Instrument Serif', ui-serif, Georgia, serif; font-weight: 400; }
+
+        /* Grain halus agar kertas terasa organik */
+        .grain {
+            position: fixed; inset: 0; z-index: 60; pointer-events: none;
+            opacity: .06; mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* Entrance bertahap (load) */
+        @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+        @keyframes rise-line { from { transform: translateY(112%); } to { transform: none; } }
+        .rise       { opacity: 0; animation: rise 1s var(--ease) forwards; animation-delay: var(--d, 0ms); }
+        .line       { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
+        .line-inner { display: block; transform: translateY(112%); animation: rise-line 1.1s var(--ease) forwards; animation-delay: var(--d, 0ms); }
+
+        /* Scroll reveal */
+        .reveal    { opacity: 0; transform: translateY(30px); transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: var(--d, 0ms); }
+        .reveal.in { opacity: 1; transform: none; }
+
+        /* Strip metrik */
+        .metric { padding: 2rem 1.25rem; border-left: 1px solid #e7e5e4; }
+        .metric:nth-child(odd)    { border-left: 0; }
+        .metric:nth-child(-n+2)   { border-bottom: 1px solid #e7e5e4; }
+        @media (min-width: 1024px) {
+            .metric { padding: 2.5rem 2rem; }
+            .metric:nth-child(odd)  { border-left: 1px solid #e7e5e4; }
+            .metric:first-child     { border-left: 0; }
+            .metric:nth-child(-n+2) { border-bottom: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rise, .line-inner, .reveal { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+            .animate-ping { animation: none !important; }
+        }
+    </style>
+    <noscript><style>.rise,.reveal{opacity:1!important;transform:none!important}.line-inner{transform:none!important}</style></noscript>
+</head>
+
+<body class="bg-paper text-ink font-sans antialiased selection:bg-ochre selection:text-white">
+<div class="grain" aria-hidden="true"></div>
+
+{{-- ═════════════════════ NAVBAR ═════════════════════ --}}
+<header id="site-header" data-scrolled="false"
+        class="sticky top-0 z-50 border-b border-transparent bg-paper/80 backdrop-blur-md transition-colors duration-300 data-[scrolled=true]:border-stone-200">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+        <a href="{{ route('home') }}" class="font-display text-[1.7rem] leading-none tracking-tight text-forest">
+            Pojok<em class="text-ochre">Berbagi</em>
+        </a>
+
+        <nav class="hidden items-center gap-8 text-sm font-medium text-warm md:flex" aria-label="Utama">
+            <a href="#cara-kerja" class="transition-colors hover:text-forest">Cara kerja</a>
+            <a href="#barang" class="transition-colors hover:text-forest">Barang tersedia</a>
+            <a href="{{ $katalog }}" class="transition-colors hover:text-forest">Katalog</a>
+        </nav>
+
+        <div class="hidden items-center gap-3 md:flex">
+            @if ($user)
+                <a href="{{ $dashboardUrl }}" class="text-sm font-semibold text-forest transition-colors hover:text-ochre">Dashboard</a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="rounded-xl border border-stone-300 px-4 py-2 text-sm font-semibold text-ink transition duration-300 hover:border-forest active:scale-95">Keluar</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="px-2 text-sm font-semibold text-ink transition-colors hover:text-ochre">Masuk</a>
+                <a href="{{ route('register') }}" class="rounded-xl bg-forest px-4 py-2 text-sm font-semibold text-paper transition duration-300 hover:bg-forest-soft active:scale-95">Daftar</a>
+            @endif
+        </div>
+
+        <button id="menu-btn" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu"
+                class="-mr-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-forest md:hidden">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 8h16M4 16h16"/></svg>
+        </button>
+    </div>
+
+    <div id="mobile-menu" class="hidden border-t border-stone-200 bg-paper md:hidden">
+        <div class="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-4 text-[15px] font-medium text-ink sm:px-8">
+            <a href="#cara-kerja" class="rounded-lg px-2 py-2.5 hover:bg-stone-100">Cara kerja</a>
+            <a href="#barang" class="rounded-lg px-2 py-2.5 hover:bg-stone-100">Barang tersedia</a>
+            <a href="{{ $katalog }}" class="rounded-lg px-2 py-2.5 hover:bg-stone-100">Katalog</a>
+            <div class="mt-2 flex gap-2 border-t border-stone-200 pt-4">
+                @if ($user)
+                    <a href="{{ $dashboardUrl }}" class="flex-1 rounded-xl bg-forest px-4 py-3 text-center text-sm font-semibold text-paper">Dashboard</a>
+                @else
+                    <a href="{{ route('login') }}" class="flex-1 rounded-xl border border-stone-300 px-4 py-3 text-center text-sm font-semibold">Masuk</a>
+                    <a href="{{ route('register') }}" class="flex-1 rounded-xl bg-forest px-4 py-3 text-center text-sm font-semibold text-paper">Daftar</a>
+                @endif
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+{{-- ═════════════════════ HERO ═════════════════════ --}}
+<section class="relative">
+    <div class="mx-auto max-w-7xl px-5 pb-20 pt-12 sm:px-8 lg:pb-28 lg:pt-20">
+        <div class="grid items-center gap-14 lg:grid-cols-12 lg:gap-10">
+
+            {{-- Teks --}}
+            <div class="lg:col-span-6">
+                <p class="rise flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[.18em] text-ochre" style="--d:80ms">
+                    <span class="h-px w-9 bg-ochre"></span>
+                    Redistribusi perlengkapan sekolah
                 </p>
 
-                <h1 class="text-3xl sm:text-4xl lg:text-[2.85rem] font-extrabold leading-[1.18] text-stone-900">
-                    Pendidikan Berkualitas<br class="hidden sm:inline"> untuk
-                    <span class="font-editorial font-bold text-emerald-700 italic"> Setiap Anak</span>.
+                <h1 class="font-display mt-6 text-[clamp(3rem,7vw,5.9rem)] leading-[.98] tracking-[-.02em] text-ink">
+                    <span class="line"><span class="line-inner" style="--d:160ms">Dari rak bukumu,</span></span>
+                    <span class="line"><span class="line-inner" style="--d:260ms">ke meja belajar</span></span>
+                    <span class="line"><span class="line-inner" style="--d:360ms"><em class="text-ochre">anak lain.</em></span></span>
                 </h1>
 
-                <p class="mt-5 text-base sm:text-[17px] text-stone-500 leading-relaxed max-w-xl">
-                    <strong class="text-stone-700">PojokBerbagi</strong> menghubungkan kebaikan hati Anda dengan siswa yang membutuhkan — buku pelajaran, alat tulis, seragam, hingga perangkat belajar. Transparan, terverifikasi, dan langsung berdampak.
+                <p class="rise mt-8 max-w-[34rem] text-[17px] leading-relaxed text-warm" style="--d:560ms">
+                    PojokBerbagi mempertemukan donatur dengan siswa yang membutuhkan buku pelajaran, seragam, dan alat tulis layak pakai. Setiap barang diperiksa Tim Posko Transit sebelum sampai ke tangan penerima.
                 </p>
 
-                {{-- CTA Buttons --}}
-                <div class="mt-8 flex flex-wrap items-center gap-3">
-                    @auth
-                        @if (auth()->user()->isDonor())
-                            <a href="{{ route('items.create') }}"
-                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Donasikan Barang
-                            </a>
-                            <a href="{{ route('katalog.index') }}"
-                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
-                                Lihat Katalog Kebutuhan
-                            </a>
-                        @elseif (auth()->user()->isBeneficiary())
-                            <a href="{{ route('beneficiary.dashboard') }}"
-                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
-                                Jelajahi Katalog Donasi
-                            </a>
-                            <a href="{{ route('katalog.index') }}"
-                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
-                                Lihat Katalog Kebutuhan
-                            </a>
-                        @elseif (auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}"
-                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
-                                Buka Panel Admin
-                            </a>
-                            <a href="{{ route('admin.distributions.index') }}"
-                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
-                                Kelola Penyaluran
-                            </a>
-                        @endif
-                    @else
-                        <a href="{{ route('register') }}"
-                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
-                            Mulai Berbagi Sekarang
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </a>
-                        <a href="{{ route('katalog.index') }}"
-                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
-                            Lihat Katalog Kebutuhan
-                        </a>
-                    @endauth
+                <div class="rise mt-10 flex flex-wrap items-center gap-3" style="--d:680ms">
+                    <a href="{{ $cta[0][1] }}"
+                       class="group inline-flex items-center gap-2.5 rounded-xl bg-forest px-6 py-3.5 text-sm font-semibold text-paper transition duration-300 hover:bg-forest-soft active:scale-95">
+                        {{ $cta[0][0] }}
+                        <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                    </a>
+                    <a href="{{ $cta[1][1] }}"
+                       class="group inline-flex items-center gap-2.5 rounded-xl border border-stone-300 px-6 py-3.5 text-sm font-semibold text-ink transition duration-300 hover:border-forest hover:bg-stone-100/70 active:scale-95">
+                        {{ $cta[1][0] }}
+                        <svg class="h-4 w-4 text-warm transition duration-300 group-hover:translate-x-1 group-hover:text-forest" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                    </a>
                 </div>
 
-                {{-- Social proof micro-stats --}}
-                <div class="mt-8 flex flex-wrap items-center gap-6 text-sm text-stone-500">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
-                        </div>
-                        <span><strong class="text-stone-800">{{ \App\Models\User::where('role','donor')->count() ?: '50' }}+</strong> Donatur</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                            <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                        </div>
-                        <span><strong class="text-stone-800">{{ \App\Models\DonationItem::count() ?: '120' }}+</strong> Barang Tercatat</span>
-                    </div>
-                </div>
+                <p class="rise mt-8 flex items-center gap-2 text-[13px] text-warm" style="--d:800ms">
+                    <svg class="h-4 w-4 shrink-0 text-forest" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+                    Tidak ada barang yang disalurkan sebelum lolos verifikasi.
+                </p>
             </div>
 
-            {{-- RIGHT: Visual collage (≈40%) --}}
-            <div class="lg:col-span-2 relative hidden lg:block">
-                {{-- Photo collage using CSS illustration placeholders (no real images needed) --}}
-                <div class="relative w-full aspect-[4/5]">
-                    {{-- Main visual card --}}
-                    <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-amber-50 border border-stone-200/60 shadow-lg overflow-hidden">
-                        {{-- Abstract illustration suggesting education --}}
-                        <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                            <div class="w-24 h-24 rounded-full bg-emerald-200/80 flex items-center justify-center mb-4">
-                                <svg class="w-12 h-12 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                            </div>
-                            <p class="text-sm font-semibold text-emerald-800/60">Buku · Seragam · Alat Tulis</p>
-                            <p class="text-xs text-emerald-700/40 mt-1">Perlengkapan belajar untuk masa depan</p>
-                        </div>
+            {{-- Kolase foto editorial + kartu status --}}
+            <div class="lg:col-span-6">
+                <div class="relative mx-auto aspect-[5/5.6] w-full max-w-[34rem] lg:ml-auto lg:max-w-none">
+                    <div class="grid h-full grid-cols-12 grid-rows-12 gap-3">
+
+                        <figure class="rise group relative col-span-7 col-start-1 row-span-8 row-start-1 overflow-hidden rounded-2xl border border-stone-200 bg-stone-200" style="--d:300ms">
+                            <img src="{{ $img('1509062522246-3755977927d7', 1000) }}" alt="Guru dan siswa di ruang kelas"
+                                 fetchpriority="high" onerror="this.style.display='none'"
+                                 class="h-full w-full object-cover object-[42%_50%] transition-transform duration-700 ease-out group-hover:scale-105">
+                        </figure>
+
+                        <figure class="rise group relative col-span-5 col-start-8 row-span-5 row-start-1 overflow-hidden rounded-2xl border border-stone-200 bg-stone-200" style="--d:420ms">
+                            <img src="{{ $img('1497633762265-9d179a990aa6', 700) }}" alt="Tumpukan buku berwarna" loading="eager" onerror="this.style.display='none'"
+                                 class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105">
+                        </figure>
+
+                        <figure class="rise group relative col-span-5 col-start-8 row-span-7 row-start-6 overflow-hidden rounded-2xl border border-stone-200 bg-stone-200" style="--d:540ms">
+                            <img src="{{ $img('1503676260728-1c00da094a0b', 700) }}" alt="Buku, apel, dan pensil warna di atas meja belajar" loading="eager" onerror="this.style.display='none'"
+                                 class="h-full w-full object-cover object-[35%_50%] transition-transform duration-700 ease-out group-hover:scale-105">
+                        </figure>
                     </div>
 
-                    {{-- Floating card: Buku Tersalurkan --}}
-                    <div class="absolute -left-6 top-8 bg-white rounded-2xl shadow-xl border border-stone-100 px-4 py-3 flex items-center gap-3 animate-float-slow">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"/></svg>
+                    {{-- Kartu status distribusi --}}
+                    <div class="rise absolute bottom-0 left-0 w-[64%] min-w-[15.5rem] max-w-[21rem] rounded-xl border border-stone-200 bg-paper/95 p-4 shadow-[0_10px_30px_-14px_rgba(20,54,43,.35)] backdrop-blur sm:p-5 lg:-left-6" style="--d:760ms">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="inline-flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-[.16em] text-warm">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-ochre opacity-60"></span>
+                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-ochre"></span>
+                                </span>
+                                {{ $isSample ? 'Contoh alur' : 'Status distribusi' }}
+                            </span>
+                            <span class="text-[11px] text-stone-400">{{ $live['waktu'] }}</span>
                         </div>
-                        <div>
-                            <div class="text-lg font-extrabold text-stone-900 leading-none">1.240+</div>
-                            <div class="text-[11px] text-stone-400 font-medium">Buku Tersalurkan</div>
-                        </div>
-                    </div>
 
-                    {{-- Floating card: Sekolah Terbantu --}}
-                    <div class="absolute -right-4 bottom-16 bg-white rounded-2xl shadow-xl border border-stone-100 px-4 py-3 flex items-center gap-3 animate-float-delayed">
-                        <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        </div>
-                        <div>
-                            <div class="text-lg font-extrabold text-stone-900 leading-none">85</div>
-                            <div class="text-[11px] text-stone-400 font-medium">Sekolah Terbantu</div>
-                        </div>
-                    </div>
+                        <p class="font-display mt-3 line-clamp-2 text-[1.35rem] leading-[1.15] text-ink">{{ $live['nama'] }}</p>
+                        <p class="mt-1 text-xs text-warm">{{ $live['meta'] }}</p>
 
-                    {{-- Floating card: check mark --}}
-                    <div class="absolute left-4 bottom-4 bg-emerald-600 text-white rounded-xl shadow-lg px-3 py-2 text-xs font-bold flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        Terverifikasi & Transparan
+                        <div class="mt-4 grid grid-cols-3 gap-1.5" role="img" aria-label="Tahap {{ $live['step'] }} dari 3: {{ $stepLabels[$live['step'] - 1] }}">
+                            @foreach ($stepLabels as $i => $label)
+                                <div>
+                                    <div class="h-1 rounded-full {{ $i < $live['step'] ? 'bg-forest' : 'bg-stone-200' }}"></div>
+                                    <p class="mt-1.5 text-[10.5px] {{ $i + 1 === $live['step'] ? 'font-semibold text-forest' : 'text-stone-400' }}">{{ $label }}</p>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
@@ -142,197 +256,223 @@
     </div>
 </section>
 
-
-{{-- ═══════════════════════════════════════════════════════
-     SECTION: Tiga Peran Utama
-     Warm palette, humanis cards
-     ═══════════════════════════════════════════════════════ --}}
-<section class="py-14 lg:py-16 border-t border-stone-200/40" style="background:#FAF9F6;">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-xl mx-auto mb-10">
-            <p class="text-sm font-semibold tracking-wide text-amber-700 mb-2 flex items-center justify-center gap-2">
-                <span class="inline-block w-6 h-px bg-amber-600"></span>
-                Bagaimana Ini Bekerja
-                <span class="inline-block w-6 h-px bg-amber-600"></span>
-            </p>
-            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900">
-                Ekosistem Saling Bantu yang<br class="hidden sm:inline"> <span class="font-editorial italic text-emerald-700">Aman &amp; Terverifikasi</span>
-            </h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {{-- Donatur --}}
-            <div class="bg-white p-7 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group">
-                <div>
-                    <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    </div>
-                    <h3 class="text-base font-bold text-stone-900 mb-1.5">Donatur</h3>
-                    <p class="text-[13px] text-stone-500 leading-relaxed">
-                        Unggah barang edukasi layak pakai melalui form sederhana. Pantau status donasi Anda hingga barang diterima siswa.
-                    </p>
-                </div>
-                <div class="mt-5 pt-3 border-t border-stone-100 text-[11px] font-semibold text-emerald-700">
-                    Buku · Seragam · Alat Tulis · Perangkat Belajar
-                </div>
+{{-- ═════════════════════ STRIP METRIK ═════════════════════ --}}
+<section class="border-y border-stone-200 bg-white/40" aria-label="Angka platform">
+    <div class="mx-auto grid max-w-7xl grid-cols-2 px-5 sm:px-8 lg:grid-cols-4">
+        @foreach ($metricList as $i => $m)
+            <div class="metric reveal" style="--d:{{ $i * 90 }}ms">
+                <p class="font-display text-[clamp(2.6rem,5vw,4rem)] leading-none tracking-tight text-forest">
+                    <span data-count="{{ $m['n'] }}">{{ number_format($m['n'], 0, ',', '.') }}</span>
+                </p>
+                <p class="mt-3 text-sm font-semibold text-ink">{{ $m['label'] }}</p>
+                <p class="mt-1 text-[12.5px] leading-snug text-warm">{{ $m['note'] }}</p>
             </div>
+        @endforeach
+    </div>
+    <p class="mx-auto max-w-7xl px-5 pb-5 text-[11.5px] text-stone-400 sm:px-8">Dihitung langsung dari data platform.</p>
+</section>
 
-            {{-- Penerima Manfaat --}}
-            <div class="bg-white p-7 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group">
-                <div>
-                    <div class="w-11 h-11 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    </div>
-                    <h3 class="text-base font-bold text-stone-900 mb-1.5">Penerima Manfaat</h3>
-                    <p class="text-[13px] text-stone-500 leading-relaxed">
-                        Jelajahi katalog perlengkapan belajar yang tersedia dan temukan bantuan sesuai kebutuhan pendidikan Anda.
-                    </p>
-                </div>
-                <div class="mt-5 pt-3 border-t border-stone-100 text-[11px] font-semibold text-sky-700">
-                    Akses Mudah · Cari & Temukan · Detail Lengkap
-                </div>
-            </div>
-
-            {{-- Tim Posko Transit --}}
-            <div class="bg-white p-7 rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between group">
-                <div>
-                    <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    </div>
-                    <h3 class="text-base font-bold text-stone-900 mb-1.5">Tim Posko Transit</h3>
-                    <p class="text-[13px] text-stone-500 leading-relaxed">
-                        Verifikasi barang, kelola penyaluran, catat bukti serah terima, dan pastikan setiap donasi sampai tepat sasaran.
-                    </p>
-                </div>
-                <div class="mt-5 pt-3 border-t border-stone-100 text-[11px] font-semibold text-amber-700">
-                    Verifikasi · Tracking · Bukti Serah Terima
-                </div>
+{{-- ═════════════════════ CARA KERJA ═════════════════════ --}}
+<section id="cara-kerja" class="scroll-mt-16 py-24 lg:py-32">
+    <div class="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-5">
+            <div class="reveal lg:sticky lg:top-28">
+                <p class="flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[.18em] text-ochre">
+                    <span class="h-px w-9 bg-ochre"></span> Cara kerja
+                </p>
+                <h2 class="font-display mt-5 text-[clamp(2.4rem,4.6vw,3.8rem)] leading-[1.02] tracking-[-.015em]">
+                    Tiga langkah, <em class="text-ochre">satu rantai</em> kepercayaan.
+                </h2>
+                <p class="mt-6 max-w-md text-[16px] leading-relaxed text-warm">
+                    Donatur tidak perlu mencari penerima, penerima tidak perlu bertanya ke mana barang itu berasal. Tim Posko Transit berada di tengah untuk memastikan semuanya tepat.
+                </p>
             </div>
         </div>
+
+        <ol class="lg:col-span-7">
+            @foreach ([
+                ['01', 'Donatur mengunggah barang', 'Foto, kondisi, dan jumlah barang dicatat lewat satu formulir singkat. Tidak perlu tahu siapa yang akan menerimanya.', 'Donatur'],
+                ['02', 'Posko memeriksa kelayakan', 'Tim Posko Transit mengecek setiap barang sebelum masuk katalog. Barang yang tidak layak pakai tidak akan disalurkan.', 'Tim Posko Transit'],
+                ['03', 'Tiba dengan bukti serah terima', 'Barang disalurkan kepada penerima manfaat. Statusnya bisa dipantau, dan foto serah terima tersimpan sebagai bukti.', 'Penerima manfaat'],
+            ] as $i => [$no, $judul, $isi, $tag])
+                <li class="reveal group grid grid-cols-[auto_1fr] gap-x-6 border-t border-stone-300 py-9 first:border-t-0 first:pt-0 lg:gap-x-10" style="--d:{{ $i * 110 }}ms">
+                    <span class="font-display text-[3.2rem] leading-none text-ochre/90 transition-transform duration-500 ease-out group-hover:-translate-y-1 lg:text-[4rem]">{{ $no }}</span>
+                    <div>
+                        <span class="inline-block rounded-md border border-stone-300 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[.14em] text-warm">{{ $tag }}</span>
+                        <h3 class="font-display mt-3 text-[1.9rem] leading-tight text-ink lg:text-[2.2rem]">{{ $judul }}</h3>
+                        <p class="mt-3 max-w-lg text-[15.5px] leading-relaxed text-warm">{{ $isi }}</p>
+                    </div>
+                </li>
+            @endforeach
+        </ol>
     </div>
 </section>
 
-
-{{-- ═══════════════════════════════════════════════════════
-     SECTION: Barang Donasi Terkini
-     ═══════════════════════════════════════════════════════ --}}
-<section class="py-14 lg:py-16 bg-white border-t border-stone-200/40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+{{-- ═════════════════════ BARANG TERSEDIA ═════════════════════ --}}
+<section id="barang" class="scroll-mt-16 border-t border-stone-200 bg-white/40 py-24 lg:py-28">
+    <div class="mx-auto max-w-7xl px-5 sm:px-8">
+        <div class="reveal flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <p class="text-sm font-semibold tracking-wide text-amber-700 mb-1 flex items-center gap-2">
-                    <span class="inline-block w-6 h-px bg-amber-600"></span>
-                    Tersedia Sekarang
+                <p class="flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[.18em] text-ochre">
+                    <span class="h-px w-9 bg-ochre"></span> Tersedia sekarang
                 </p>
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900">Barang Donasi Terkini</h2>
-                <p class="text-[13px] text-stone-500 mt-1">Perlengkapan belajar siap disalurkan kepada siswa yang membutuhkan</p>
+                <h2 class="font-display mt-5 text-[clamp(2.3rem,4.4vw,3.5rem)] leading-[1.03] tracking-[-.015em]">
+                    Siap menemukan <em class="text-ochre">pemiliknya.</em>
+                </h2>
             </div>
-            <a href="{{ route('katalog.index') }}" class="text-[13px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 transition-colors shrink-0">
-                Lihat Semua Katalog
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <a href="{{ $katalog }}" class="group inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-forest transition-colors hover:text-ochre">
+                Lihat semua di katalog
+                <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
             </a>
         </div>
 
         @if ($recentItems->isEmpty())
-            <div class="p-10 text-center rounded-2xl border border-dashed border-stone-300" style="background:#FAF9F6;">
-                <svg class="w-10 h-10 mx-auto text-stone-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                <p class="text-sm text-stone-400">Belum ada barang donasi yang diposting.</p>
+            <div class="reveal mt-12 rounded-2xl border border-dashed border-stone-300 px-6 py-16 text-center">
+                <p class="font-display text-2xl text-ink">Belum ada barang yang tersedia.</p>
+                <p class="mt-2 text-sm text-warm">Jadilah yang pertama berbagi — barang Anda akan muncul di sini setelah diverifikasi.</p>
             </div>
         @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                @foreach ($recentItems as $item)
-                    <div class="bg-white rounded-2xl border border-stone-200/60 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group">
-                        {{-- Image --}}
-                        <div class="relative aspect-[16/10] bg-stone-100 overflow-hidden">
+            <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($recentItems as $i => $item)
+                    <article class="reveal group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-paper transition-colors duration-300 hover:border-stone-300" style="--d:{{ ($i % 3) * 90 }}ms">
+                        <div class="relative aspect-[4/3] overflow-hidden bg-stone-200">
                             @if ($item->foto)
-                                <img src="{{ $item->foto_url }}" alt="{{ $item->nama_barang }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                <img src="{{ $item->foto_url }}" alt="{{ $item->nama_barang }}" loading="lazy"
+                                     class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105">
                             @else
-                                <div class="w-full h-full flex flex-col items-center justify-center text-stone-300 p-4" style="background: linear-gradient(135deg, #f5f0e8, #eee8db);">
-                                    <svg class="w-10 h-10 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    <span class="text-xs text-stone-400">Tanpa Foto</span>
+                                <div class="flex h-full w-full items-center justify-center bg-[#efeae0] px-6 text-center">
+                                    <span class="font-display text-2xl italic text-stone-400">{{ $item->kategori }}</span>
                                 </div>
                             @endif
-                            <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/90 text-stone-700 backdrop-blur-sm shadow-sm">
-                                {{ $item->kondisi }}
-                            </span>
+                            <span class="absolute left-3 top-3 rounded-md border border-stone-200 bg-paper/90 px-2 py-1 text-[10.5px] font-semibold text-warm backdrop-blur">{{ $item->kondisi }}</span>
                         </div>
-                        {{-- Content --}}
-                        <div class="p-5 flex-1 flex flex-col justify-between">
-                            <div>
-                                <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1 block">{{ $item->kategori }}</span>
-                                <h3 class="font-bold text-stone-900 text-sm group-hover:text-emerald-700 transition-colors line-clamp-1">
-                                    {{ $item->nama_barang }}
-                                </h3>
-                                <p class="text-[13px] text-stone-500 mt-1.5 line-clamp-2 leading-relaxed">
-                                    {{ $item->deskripsi }}
-                                </p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
-                                <span class="font-bold text-stone-700">{{ $item->jumlah }} Unit</span>
-                                @auth
-                                    <a href="{{ route('items.show', $item->id) }}" class="font-bold text-emerald-700 hover:text-emerald-800 transition-colors">
-                                        Lihat Detail →
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="font-bold text-emerald-700 hover:text-emerald-800 transition-colors">
-                                        Masuk untuk Detail →
-                                    </a>
-                                @endauth
+                        <div class="flex flex-1 flex-col p-5">
+                            <p class="text-[10.5px] font-semibold uppercase tracking-[.14em] text-ochre">{{ $item->kategori }}</p>
+                            <h3 class="font-display mt-2 line-clamp-2 text-[1.55rem] leading-[1.12] text-ink">{{ $item->nama_barang }}</h3>
+                            <p class="mt-2 line-clamp-2 text-[14px] leading-relaxed text-warm">{{ $item->deskripsi }}</p>
+                            <div class="mt-auto flex items-center justify-between border-t border-stone-200 pt-4 text-sm">
+                                <span class="font-semibold text-ink">{{ $item->jumlah }} unit</span>
+                                <a href="{{ $user ? route('items.show', $item->id) : route('login') }}" class="group/l inline-flex items-center gap-1.5 font-semibold text-forest transition-colors hover:text-ochre">
+                                    {{ $user ? 'Lihat detail' : 'Masuk untuk detail' }}
+                                    <svg class="h-3.5 w-3.5 transition-transform duration-300 group-hover/l:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                                </a>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 @endforeach
             </div>
         @endif
     </div>
 </section>
 
-
-{{-- ═══════════════════════════════════════════════════════
-     SECTION: CTA Penutup
-     ═══════════════════════════════════════════════════════ --}}
-<section class="py-16 border-t border-stone-200/40" style="background: linear-gradient(170deg, #ecfdf5 0%, #FAF9F6 100%);">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 mb-3">
-            Mulai Berbagi, <span class="font-editorial italic text-emerald-700">Mulai Hari Ini</span>
-        </h2>
-        <p class="text-[15px] text-stone-500 mb-8 max-w-lg mx-auto leading-relaxed">
-            Setiap buku, seragam, atau alat tulis yang Anda donasikan membuka jalan bagi seorang anak untuk meraih masa depan yang lebih cerah.
-        </p>
-        <div class="flex flex-wrap justify-center gap-3">
-            @auth
-                <a href="{{ route('katalog.index') }}"
-                   class="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
-                    Jelajahi Katalog
+{{-- ═════════════════════ CTA PENUTUP ═════════════════════ --}}
+<section class="px-5 py-20 sm:px-8 lg:py-28">
+    <div class="reveal mx-auto grid max-w-7xl overflow-hidden rounded-2xl bg-forest text-paper lg:grid-cols-12">
+        <div class="p-8 sm:p-12 lg:col-span-7 lg:p-16">
+            <p class="flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[.18em] text-[#f0a974]">
+                <span class="h-px w-9 bg-[#f0a974]"></span> Mulai dari yang kecil
+            </p>
+            <h2 class="font-display mt-6 text-[clamp(2.4rem,4.8vw,4rem)] leading-[1.02] tracking-[-.015em]">
+                Satu barang yang tak lagi terpakai bisa jadi <em class="text-[#f0a974]">buku pertama</em> seorang anak.
+            </h2>
+            <p class="mt-6 max-w-lg text-[16px] leading-relaxed text-paper/70">
+                Daftar, unggah barang, lalu pantau perjalanannya sampai tiba. Prosesnya ringkas, dan setiap tahap tercatat.
+            </p>
+            <div class="mt-10 flex flex-wrap gap-3">
+                <a href="{{ $cta[0][1] }}" class="group inline-flex items-center gap-2.5 rounded-xl bg-paper px-6 py-3.5 text-sm font-semibold text-forest transition duration-300 hover:bg-white active:scale-95">
+                    {{ $cta[0][0] }}
+                    <svg class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
                 </a>
-            @else
-                <a href="{{ route('register') }}"
-                   class="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
-                    Bergabung Sekarang
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                <a href="{{ $katalog }}" class="inline-flex items-center rounded-xl border border-paper/25 px-6 py-3.5 text-sm font-semibold text-paper transition duration-300 hover:bg-paper/10 active:scale-95">
+                    Jelajahi katalog
                 </a>
-                <a href="{{ route('katalog.index') }}"
-                   class="inline-flex items-center gap-2 px-7 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
-                    Lihat Katalog Kebutuhan
-                </a>
-            @endauth
+            </div>
+        </div>
+        <div class="group relative hidden min-h-[22rem] overflow-hidden lg:col-span-5 lg:block">
+            <img src="{{ $img('1456513080510-7bf3a84b82f8', 900) }}" alt="Buku terbuka dengan pena di atas meja" loading="lazy" onerror="this.style.display='none'"
+                 class="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-700 ease-out group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-r from-forest via-forest/20 to-transparent"></div>
         </div>
     </div>
 </section>
+</main>
 
-@push('head')
-<style>
-    @keyframes float-slow {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-    }
-    @keyframes float-delayed {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-8px); }
-    }
-    .animate-float-slow { animation: float-slow 5s ease-in-out infinite; }
-    .animate-float-delayed { animation: float-delayed 6s ease-in-out 1s infinite; }
-</style>
-@endpush
+{{-- ═════════════════════ FOOTER ═════════════════════ --}}
+<footer class="border-t border-stone-200">
+    <div class="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-12 sm:px-8 md:flex-row md:items-end md:justify-between">
+        <div>
+            <a href="{{ route('home') }}" class="font-display text-3xl leading-none text-forest">Pojok<em class="text-ochre">Berbagi</em></a>
+            <p class="mt-3 max-w-xs text-[13.5px] leading-relaxed text-warm">Platform redistribusi barang edukasi layak pakai untuk pemerataan akses pendidikan.</p>
+        </div>
+        <nav class="flex flex-wrap gap-x-8 gap-y-3 text-sm font-medium text-warm" aria-label="Footer">
+            <a href="#cara-kerja" class="transition-colors hover:text-forest">Cara kerja</a>
+            <a href="{{ $katalog }}" class="transition-colors hover:text-forest">Katalog</a>
+            @unless ($user)
+                <a href="{{ route('login') }}" class="transition-colors hover:text-forest">Masuk</a>
+                <a href="{{ route('register') }}" class="transition-colors hover:text-forest">Daftar</a>
+            @endunless
+        </nav>
+    </div>
+    <div class="border-t border-stone-200">
+        <p class="mx-auto max-w-7xl px-5 py-5 text-xs text-stone-400 sm:px-8">&copy; {{ date('Y') }} PojokBerbagi. Hak cipta dilindungi.</p>
+    </div>
+</footer>
 
-@endsection
+<script>
+(function () {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Navbar: border tipis muncul saat di-scroll
+    var header = document.getElementById('site-header');
+    var onScroll = function () { header.dataset.scrolled = window.scrollY > 8 ? 'true' : 'false'; };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Menu mobile
+    var btn = document.getElementById('menu-btn'), menu = document.getElementById('mobile-menu');
+    btn.addEventListener('click', function () {
+        var open = menu.classList.toggle('hidden') === false;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    menu.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () { menu.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); });
+    });
+
+    if (reduce || !('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+        return; // angka sudah berisi nilai akhir
+    }
+
+    // Scroll reveal
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+    // Counter angka
+    var fmt = new Intl.NumberFormat('id-ID');
+    var easeOutExpo = function (t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); };
+    var counters = document.querySelectorAll('[data-count]');
+    counters.forEach(function (el) { el.textContent = '0'; });
+
+    var co = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            co.unobserve(e.target);
+            var el = e.target, target = parseInt(el.dataset.count, 10) || 0, dur = 1600, t0 = null;
+            var step = function (ts) {
+                if (t0 === null) t0 = ts;
+                var p = Math.min((ts - t0) / dur, 1);
+                el.textContent = fmt.format(Math.round(target * easeOutExpo(p)));
+                if (p < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        });
+    }, { threshold: 0.6 });
+    counters.forEach(function (el) { co.observe(el); });
+})();
+</script>
+</body>
+</html>
