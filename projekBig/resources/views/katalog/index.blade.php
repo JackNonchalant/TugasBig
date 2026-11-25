@@ -46,6 +46,14 @@
         </div>
     </div>
 
+    <!-- Penanganan Kegagalan Pemuatan -->
+    @if (!empty($loadError))
+        <div class="mb-6 flex items-center gap-3 p-4 rounded-xl bg-red-50/90 border border-red-200 text-red-900 text-sm">
+            <span class="w-2 h-2 rounded-full bg-red-600 shrink-0"></span>
+            <p class="font-medium">{{ $loadError }}</p>
+        </div>
+    @endif
+
     <!-- Daftar Barang Katalog -->
     @if ($items->isEmpty())
         <div class="bg-white rounded-2xl border border-dashed border-stone-300 p-14 text-center">
@@ -61,8 +69,8 @@
                 <article class="catalog-card reveal group bg-white rounded-xl border border-stone-200 overflow-hidden hover:border-stone-300 transition-colors flex flex-col" style="--d:{{ ($i % 4) * 60 }}ms">
                     <!-- Thumbnail / Foto Barang -->
                     <div class="catalog-thumb relative h-48 bg-cream overflow-hidden shrink-0">
-                        @if ($item->foto)
-                            <img src="{{ asset('storage/' . $item->foto) }}"
+                        @if ($item->foto_url)
+                            <img src="{{ $item->foto_url }}"
                                  alt="{{ $item->nama_barang }}"
                                  loading="lazy"
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
@@ -82,9 +90,10 @@
                     <!-- Konten Kartu -->
                     <div class="p-5 flex-1 flex flex-col justify-between">
                         <div>
-                            <p class="text-[10.5px] font-semibold text-ochre uppercase tracking-[.14em] mb-1.5">
+                            <!-- Badge Kategori (PBI-005) -->
+                            <span class="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-ochre/10 text-ochre border border-ochre/20 uppercase tracking-[.12em] mb-2">
                                 {{ $item->kategori }}
-                            </p>
+                            </span>
 
                             <h2 class="font-display text-[1.45rem] leading-[1.15] text-ink group-hover:text-forest transition-colors line-clamp-2">
                                 {{ $item->nama_barang }}
@@ -93,6 +102,17 @@
                             <p class="text-xs text-warm mt-2 line-clamp-2 leading-relaxed">
                                 {{ $item->deskripsi }}
                             </p>
+
+                            <!-- Lokasi Posko Transit (PBI-004) -->
+                            <div class="mt-3 flex items-start gap-1.5 text-[11.5px] text-warm">
+                                <svg class="w-3.5 h-3.5 text-forest shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span class="line-clamp-1" title="{{ $item->lokasi_posko ?? 'Posko Transit Pusat' }}">
+                                    {{ $item->lokasi_posko ?? 'Posko Transit Pusat' }}
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Footer Kartu -->
@@ -129,7 +149,7 @@
             @endforeach
         </div>
 
-        <!-- Pagination -->
+        <!-- Pagination (PBI-006) -->
         @if ($items->hasPages())
             <div class="mt-8 bg-white rounded-xl border border-stone-200 px-6 py-4">
                 {{ $items->links() }}

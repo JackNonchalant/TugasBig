@@ -93,6 +93,9 @@ class DonationItemController extends Controller
 
         return redirect()
             ->route('items.show', $item->id)
+            ->with('success', 'Barang donasi pendidikan berhasil diposting dan menunggu verifikasi Tim Posko Transit!');
+        return redirect()
+            ->route('items.show', $item->id)
             ->with('success', 'Barang donasi pendidikan berhasil diposting!');
     }
 
@@ -104,5 +107,29 @@ class DonationItemController extends Controller
         $item = DonationItem::with('donor')->findOrFail($id);
 
         return view('items.show', compact('item'));
+    }
+
+    /**
+     * Verifikasi kelayakan barang donasi oleh Tim Posko Transit (Admin).
+     */
+    public function verify(Request $request, $id): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', 'in:approve,reject'],
+        ]);
+
+        $item = DonationItem::findOrFail($id);
+
+        if ($validated['action'] === 'approve') {
+            $item->update(['status' => 'tersedia']);
+            $message = 'Barang "' . $item->nama_barang . '" lolos verifikasi dan sekarang tampil di Katalog Publik.';
+        } else {
+            $item->update(['status' => 'ditolak']);
+            $message = 'Barang "' . $item->nama_barang . '" ditolak dan tidak ditampilkan di Katalog Publik.';
+        }
+
+        return redirect()
+            ->route('items.show', $item->id)
+            ->with('success', $message);
     }
 }

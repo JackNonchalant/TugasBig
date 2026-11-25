@@ -4,28 +4,45 @@ namespace App\Http\Controllers;
 
 use App\Models\DonationItem;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class KatalogController extends Controller
 {
     public function index(Request $request)
     {
-        $page = $request->get('page', 1);
+        $page = (int) $request->get('page', 1);
+        $loadError = null;
 
-        // Kunci cache otomatis berubah jika ada barang baru diposting (PBI-005)
-        $latestStamp = DonationItem::where('status', 'tersedia')->max('updated_at');
-        $totalActive = DonationItem::where('status', 'tersedia')->where('jumlah', '>', 0)->count();
-        $cacheKey = 'katalog_edukasi_p' . $page . '_' . md5($totalActive . '_' . $latestStamp);
+        try {
+            // Hanya mengambil barang yang telah disetujui (Tersedia) dan memiliki stok > 0
+            $baseQuery = DonationItem::whereIn('status', ['tersedia', 'Tersedia'])
+                ->where('jumlah', '>', 0);
 
-        // Caching katalog + fetching data berstatus tersedia + pagination 12 item (PBI-004 & PBI-006)
-        $items = Cache::remember($cacheKey, now()->addMinutes(10), function () {
-            return DonationItem::with('donor')
-                ->where('status', 'tersedia')
-                ->where('jumlah', '>', 0)
-                ->latest()
-                ->paginate(12);
-        });
+            $latestStamp = (clone $baseQuery)->max('updated_at');
+            $latestId = (clone $baseQuery)->max('id');
+            $totalActive = (clone $baseQuery)->count();
+            $cacheKey = 'katalog_edukasi_p' . $page . '_' . md5($totalActive . '_' . $latestId . '_' . $latestStamp);
 
-        return view('katalog.index', compact('items'));
+            // Caching katalog + pagination maksimal 12 item per halaman (PBI-004, PBI-005, PBI-006)
+            $items = Cache::remember($cacheKey, now()->addMinutes(10), function () {
+                return DonationItem::with('donor')
+                    ->whereIn('status', ['tersedia', 'Tersedia'])
+                    ->where('jumlah', '>', 0)
+                    ->latest()
+                    ->orderByDesc('id')
+                    ->paginate(12);
+            });
+        } catch (\Throwable $e) {
+            Log::error('Gagal memuat katalog barang edukasi: ' . $e->getMessage());
+            $loadError = 'Terjadi kendala saat memuat data katalog barang. Silakan muat ulang halaman beberapa saat lagi.';
+            $items = new LengthAwarePaginator([], 0, 12, $page, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]);
+        }
+
+        return view('katalog.index', compact('items', 'loadError'));
     }
 }

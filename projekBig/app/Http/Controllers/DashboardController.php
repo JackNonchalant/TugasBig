@@ -32,8 +32,10 @@ class DashboardController extends Controller
     public function beneficiary(): View
     {
         $items = DonationItem::where('status', 'tersedia')
+            ->where('jumlah', '>', 0)
             ->with('donor')
             ->latest()
+            ->orderByDesc('id')
             ->paginate(12);
 
         return view('dashboards.beneficiary', compact('items'));

@@ -281,11 +281,11 @@
                 </table>
             </div>
 
-            @if ($items->hasPages())
-                <div class="p-4 border-t border-slate-100">
+           @if (isset($items) && $items instanceof \Illuminate\Pagination\AbstractPaginator && $items->hasPages())
+                <div class="p-4 border-t border-stone-200">
                     {{ $items->links() }}
-                </div>
-            @endif
+               </div>
+           @endif
         @endif
     </div>
 

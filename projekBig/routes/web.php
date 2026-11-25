@@ -84,6 +84,11 @@ Route::middleware(['auth', 'account.active'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
 
+        // Verifikasi Kelayakan Barang oleh Tim Posko Transit (PBI-005)
+        Route::patch('/admin/items/{id}/verify', [DonationItemController::class, 'verify'])
+            ->whereNumber('id')
+            ->name('admin.items.verify');
+            
         // Kelola Pengguna (PBI-016, PBI-017, PBI-018)
         Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
         Route::patch('/admin/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');
