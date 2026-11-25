@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\DonationItemController;
 use App\Http\Controllers\KatalogController;
+use App\Http\Controllers\Admin\AdminItemController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Models\DonationItem;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +84,11 @@ Route::middleware(['auth', 'account.active'])->group(function () {
     // Admin Specific Routes
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+
+        // Verifikasi Barang Donasi oleh Tim Posko Transit
+        Route::get('/admin/items', [AdminItemController::class, 'index'])->name('admin.items.index');
+        Route::patch('/admin/items/{item}/approve', [AdminItemController::class, 'approve'])->name('admin.items.approve');
+        Route::patch('/admin/items/{item}/reject', [AdminItemController::class, 'reject'])->name('admin.items.reject');
 
         // Kelola Pengguna (PBI-016, PBI-017, PBI-018)
         Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');

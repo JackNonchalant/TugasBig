@@ -54,6 +54,36 @@ class DonationItem extends Model
     }
 
     /**
+     * Scope: hanya barang yang aktif/tersedia untuk ditampilkan di katalog (PBI-008).
+     */
+    public function scopeAvailable($query)
+    {
+        return $query->where('status', 'tersedia')
+                     ->where('jumlah', '>', 0);
+    }
+
+    /**
+     * Scope: pencarian aman berdasarkan nama_barang atau deskripsi (PBI-007).
+     * Menggunakan parameter binding Eloquent dan escaping wildcard LIKE.
+     */
+    public function scopeSearch($query, ?string $keyword)
+    {
+        $keyword = trim((string) $keyword);
+
+        if ($keyword === '') {
+            return $query;
+        }
+
+        $escaped = addcslashes($keyword, '\\%_');
+        $pattern = '%' . $escaped . '%';
+
+        return $query->where(function ($q) use ($pattern) {
+            $q->where('nama_barang', 'like', $pattern)
+              ->orWhere('deskripsi', 'like', $pattern);
+        });
+    }
+
+    /**
      * Helper to get public URL of the item photo.
      */
     public function getFotoUrlAttribute(): ?string

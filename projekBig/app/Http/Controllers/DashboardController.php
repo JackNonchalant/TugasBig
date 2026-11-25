@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Distribution;
 use App\Models\DonationItem;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -27,16 +28,23 @@ class DashboardController extends Controller
     }
 
     /**
-     * Beneficiary Dashboard: available items catalog.
+     * Beneficiary Dashboard: available items catalog with search & reset (F-03).
      */
-    public function beneficiary(): View
+    public function beneficiary(Request $request): View
     {
-        $items = DonationItem::where('status', 'tersedia')
+        $search = trim((string) $request->query('search', $request->query('q', '')));
+        if (mb_strlen($search) > 100) {
+            $search = mb_substr($search, 0, 100);
+        }
+
+        $items = DonationItem::available()
+            ->search($search)
             ->with('donor')
             ->latest()
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('dashboards.beneficiary', compact('items'));
+        return view('dashboards.beneficiary', compact('items', 'search'));
     }
 
     /**

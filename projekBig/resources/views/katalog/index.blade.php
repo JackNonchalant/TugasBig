@@ -44,15 +44,86 @@
                 </div>
             </div>
         </div>
+
+        <!-- F-03: Komponen Pencarian & Reset Katalog (PBI-007, PBI-008, PBI-009) -->
+        <form id="katalog-search-form" method="GET" action="{{ route('katalog.index') }}" class="mt-6">
+            <div class="bg-white rounded-2xl border border-stone-200 p-2.5 sm:p-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                <div class="relative flex-1">
+                    <svg class="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                        type="text"
+                        id="katalog-search-input"
+                        name="search"
+                        value="{{ $search ?? request('search') }}"
+                        maxlength="100"
+                        autocomplete="off"
+                        placeholder="Cari nama barang atau deskripsi (mis. buku tematik, seragam, kalkulator)..."
+                        aria-label="Kata kunci pencarian barang donasi"
+                        class="w-full pl-10 pr-4 py-2.5 bg-paper border border-stone-200 rounded-xl text-sm text-ink placeholder:text-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all"
+                    >
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="submit"
+                            class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-forest text-paper text-sm font-semibold hover:bg-forest-soft transition duration-300 active:scale-95 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Cari
+                    </button>
+
+                    <button type="button"
+                            id="katalog-reset-btn"
+                            onclick="resetKatalogSearch('{{ route('katalog.index') }}')"
+                            class="{{ filled($search ?? request('search')) ? 'inline-flex' : 'hidden' }} items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-stone-300 bg-paper text-sm font-semibold text-warm hover:text-ink hover:border-forest hover:bg-cream transition duration-300 active:scale-95 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            @if (filled($search ?? request('search')))
+                <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-warm px-1">
+                    <p>
+                        Hasil pencarian untuk <strong class="text-ink">"{{ $search ?? request('search') }}"</strong>:
+                        <strong class="text-forest">{{ $items->total() }}</strong> barang tersedia ditemukan.
+                    </p>
+                    <a href="{{ route('katalog.index') }}" class="font-semibold text-ochre hover:text-forest transition-colors">
+                        Tampilkan semua barang →
+                    </a>
+                </div>
+            @endif
+        </form>
     </div>
 
     <!-- Daftar Barang Katalog -->
     @if ($items->isEmpty())
         <div class="bg-white rounded-2xl border border-dashed border-stone-300 p-14 text-center">
-            <p class="font-display text-2xl text-ink">Belum ada barang donasi tersedia.</p>
-            <p class="text-sm text-warm mt-2 max-w-md mx-auto">
-                Saat ini belum ada perlengkapan pendidikan yang tersedia di katalog. Silakan cek kembali secara berkala.
-            </p>
+            @if (filled($search ?? request('search')))
+                <p class="font-display text-3xl text-ink">Barang tidak ditemukan.</p>
+                <p class="text-sm text-warm mt-2 max-w-md mx-auto leading-relaxed">
+                    Tidak ada barang donasi aktif yang cocok dengan kata kunci <strong class="text-ink">"{{ $search ?? request('search') }}"</strong>.
+                    Coba gunakan kata kunci lain atau tekan tombol reset untuk melihat seluruh katalog.
+                </p>
+                <div class="mt-6">
+                    <a href="{{ route('katalog.index') }}"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-forest text-paper text-sm font-semibold hover:bg-forest-soft transition duration-300 active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reset Pencarian &amp; Lihat Semua Barang
+                    </a>
+                </div>
+            @else
+                <p class="font-display text-2xl text-ink">Belum ada barang donasi tersedia.</p>
+                <p class="text-sm text-warm mt-2 max-w-md mx-auto">
+                    Saat ini belum ada perlengkapan pendidikan yang tersedia di katalog. Silakan cek kembali secara berkala.
+                </p>
+            @endif
         </div>
     @else
         <!-- Container Grid / List -->
@@ -141,6 +212,29 @@
 
 @push('scripts')
 <script>
+    // PBI-009: Reset mengosongkan kolom input lalu memuat ulang seluruh katalog aktif tanpa parameter pencarian
+    function resetKatalogSearch(baseUrl) {
+        const input = document.getElementById('katalog-search-input');
+        if (input) input.value = '';
+        window.location.href = baseUrl;
+    }
+
+    (function () {
+        const input = document.getElementById('katalog-search-input');
+        const resetBtn = document.getElementById('katalog-reset-btn');
+        if (input && resetBtn) {
+            input.addEventListener('input', function () {
+                if (input.value.trim().length > 0) {
+                    resetBtn.classList.remove('hidden');
+                    resetBtn.classList.add('inline-flex');
+                } else if (!new URLSearchParams(window.location.search).has('search')) {
+                    resetBtn.classList.add('hidden');
+                    resetBtn.classList.remove('inline-flex');
+                }
+            });
+        }
+    })();
+
     function setViewMode(mode) {
         const container = document.getElementById('catalog-container');
         const cards = document.querySelectorAll('.catalog-card');

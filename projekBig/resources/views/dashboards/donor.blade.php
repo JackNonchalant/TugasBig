@@ -129,6 +129,11 @@
                                             <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>
                                             Tersedia
                                         </span>
+                                    @elseif ($item->status === 'ditolak')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-red-50 text-red-800 border border-red-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                            Ditolak
+                                        </span>
                                     @else
                                         <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-semibold bg-stone-100 text-ink border border-stone-200">
                                             {{ ucfirst($item->status) }}

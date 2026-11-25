@@ -20,11 +20,52 @@
         </div>
     </div>
 
+    <!-- Search & Reset Bar (F-03: PBI-007, PBI-008, PBI-009) -->
+    <form method="GET" action="{{ route('beneficiary.dashboard') }}" class="bg-white rounded-2xl border border-stone-200 p-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <div class="relative flex-1">
+            <svg class="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+                type="text"
+                id="beneficiary-search-input"
+                name="search"
+                value="{{ $search ?? request('search') }}"
+                maxlength="100"
+                autocomplete="off"
+                placeholder="Cari nama barang atau deskripsi yang dibutuhkan..."
+                aria-label="Kata kunci pencarian barang donasi"
+                class="w-full pl-10 pr-4 py-2.5 bg-paper border border-stone-200 rounded-xl text-sm text-ink placeholder:text-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest transition-all"
+            >
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <button type="submit"
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-forest text-paper text-sm font-semibold hover:bg-forest-soft transition duration-300 active:scale-95 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Cari
+            </button>
+            <button type="button"
+                    id="beneficiary-reset-btn"
+                    onclick="document.getElementById('beneficiary-search-input').value=''; window.location.href='{{ route('beneficiary.dashboard') }}';"
+                    class="{{ filled($search ?? request('search')) ? 'inline-flex' : 'hidden' }} items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-stone-300 bg-paper text-sm font-semibold text-warm hover:text-ink hover:border-forest hover:bg-cream transition duration-300 active:scale-95 cursor-pointer">
+                Reset
+            </button>
+        </div>
+    </form>
+
     <!-- Items Grid Header -->
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-stone-200 pb-4">
         <div>
             <h2 class="font-display text-2xl sm:text-3xl text-ink">Barang Pendidikan Tersedia</h2>
-            <p class="text-xs text-warm mt-0.5">Pilih barang untuk melihat informasi detail dan donatur penyedia</p>
+            @if (filled($search ?? request('search')))
+                <p class="text-xs text-warm mt-0.5">
+                    Menampilkan hasil pencarian untuk <strong class="text-ink">"{{ $search ?? request('search') }}"</strong>
+                </p>
+            @else
+                <p class="text-xs text-warm mt-0.5">Pilih barang untuk melihat informasi detail dan donatur penyedia</p>
+            @endif
         </div>
         <span class="text-xs font-semibold text-warm bg-white px-3.5 py-2 rounded-xl border border-stone-200 self-start sm:self-auto">
             <strong class="text-ink">{{ $items->total() }}</strong> Barang Tersedia
@@ -33,10 +74,23 @@
 
     @if ($items->isEmpty())
         <div class="bg-white rounded-2xl border border-dashed border-stone-300 p-14 text-center">
-            <p class="font-display text-2xl text-ink">Saat ini belum ada barang donasi.</p>
-            <p class="text-xs text-warm max-w-sm mx-auto mt-2">
-                Silakan kembali lagi nanti untuk melihat pembaruan donasi perlengkapan pendidikan dari donatur kami.
-            </p>
+            @if (filled($search ?? request('search')))
+                <p class="font-display text-3xl text-ink">Barang tidak ditemukan.</p>
+                <p class="text-sm text-warm max-w-md mx-auto mt-2">
+                    Tidak ada barang aktif yang cocok dengan kata kunci <strong class="text-ink">"{{ $search ?? request('search') }}"</strong>.
+                </p>
+                <div class="mt-6">
+                    <a href="{{ route('beneficiary.dashboard') }}"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-forest text-paper text-sm font-semibold hover:bg-forest-soft transition duration-300 active:scale-95">
+                        Reset Pencarian &amp; Lihat Semua Barang
+                    </a>
+                </div>
+            @else
+                <p class="font-display text-2xl text-ink">Saat ini belum ada barang donasi.</p>
+                <p class="text-xs text-warm max-w-sm mx-auto mt-2">
+                    Silakan kembali lagi nanti untuk melihat pembaruan donasi perlengkapan pendidikan dari donatur kami.
+                </p>
+            @endif
         </div>
     @else
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

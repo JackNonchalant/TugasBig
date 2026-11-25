@@ -56,6 +56,20 @@
                     Dashboard
                 </a>
 
+                {{-- Verifikasi Barang --}}
+                <a href="{{ route('admin.items.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                          {{ request()->routeIs('admin.items.*') ? 'bg-paper text-forest font-semibold' : 'text-paper/80 hover:bg-paper/10 hover:text-paper' }}">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Verifikasi Barang
+                    @php $itemsMenunggu = \App\Models\DonationItem::where('status','Menunggu Verifikasi Transit')->count(); @endphp
+                    @if ($itemsMenunggu > 0)
+                        <span class="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold text-white bg-ochre rounded-full">{{ $itemsMenunggu }}</span>
+                    @endif
+                </a>
+
                 {{-- Penyaluran Barang --}}
                 <a href="{{ route('admin.distributions.index') }}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors

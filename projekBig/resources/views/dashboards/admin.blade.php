@@ -180,9 +180,9 @@
                 <h2 class="font-display text-2xl text-ink">Barang Donasi Terbaru</h2>
                 <p class="text-xs text-warm mt-0.5">5 postingan donasi terakhir masuk ke sistem</p>
             </div>
-            <a href="{{ route('katalog.index') }}"
+            <a href="{{ route('admin.items.index') }}"
                class="group inline-flex items-center gap-1 text-xs font-semibold text-forest hover:text-ochre transition-colors">
-                Lihat Katalog
+                Kelola &amp; Verifikasi
                 <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
             </a>
         </div>
@@ -260,6 +260,11 @@
                                             <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>
                                             Disalurkan
                                         </span>
+                                    @elseif ($item->status === 'ditolak')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-red-50 text-red-800 border border-red-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                                            Ditolak
+                                        </span>
                                     @else
                                         <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-semibold bg-stone-100 text-warm border border-stone-200">
                                             {{ ucfirst($item->status) }}
@@ -267,13 +272,25 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('items.show', $item->id) }}"
-                                       class="group inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-forest bg-cream hover:bg-stone-200/70 transition-colors">
-                                        Lihat Detail
-                                        <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
+                                    <div class="flex items-center justify-end gap-2">
+                                        @if ($item->status === 'Menunggu Verifikasi Transit')
+                                            <form method="POST" action="{{ route('admin.items.approve', $item->id) }}" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-paper bg-forest hover:bg-forest-soft transition-colors cursor-pointer active:scale-95">
+                                                    Setujui
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <a href="{{ route('items.show', $item->id) }}"
+                                           class="group inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-forest bg-cream hover:bg-stone-200/70 transition-colors">
+                                            Detail
+                                            <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
