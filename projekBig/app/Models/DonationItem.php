@@ -19,6 +19,8 @@ class DonationItem extends Model
         'kondisi',
         'jumlah',
         'foto',
+        'lokasi_posko',
+        'jadwal_penyerahan',
         'status',
         'recipient_name',
         'recipient_contact',
@@ -33,7 +35,6 @@ class DonationItem extends Model
     {
         return [
             'jumlah' => 'integer',
-            'received_at' => 'datetime',
         ];
     }
 
@@ -43,6 +44,22 @@ class DonationItem extends Model
     public function donor()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get distributions for this donation item.
+     */
+    public function distributions()
+    {
+        return $this->hasMany(Distribution::class, 'donation_item_id');
+    }
+
+    /**
+     * Get the latest/active distribution.
+     */
+    public function latestDistribution()
+    {
+        return $this->hasOne(Distribution::class, 'donation_item_id')->latestOfMany();
     }
 
     /**

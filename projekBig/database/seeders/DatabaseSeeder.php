@@ -2,7 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Distribution;
+use App\Models\DistributionProof;
+use App\Models\DistributionStatusHistory;
 use App\Models\DonationItem;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -54,6 +58,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Sangat Baik',
                 'jumlah' => 5,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
+                'jadwal_penyerahan' => now()->addDays(2)->format('Y-m-d'),
                 'status' => 'Menunggu Verifikasi Transit',
             ],
             [
@@ -64,6 +70,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Baru',
                 'jumlah' => 3,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Dago (Jl. Ir. H. Juanda No. 120, Bandung)',
+                'jadwal_penyerahan' => now()->addDays(3)->format('Y-m-d'),
                 'status' => 'Menunggu Verifikasi Transit',
             ],
             [
@@ -74,6 +82,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Layak Pakai',
                 'jumlah' => 2,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Buah Batu (Jl. Buah Batu No. 88, Bandung)',
+                'jadwal_penyerahan' => now()->subDay()->format('Y-m-d'),
                 'status' => 'tersedia',
             ],
             [
@@ -84,6 +94,8 @@ class DatabaseSeeder extends Seeder
                 'kondisi' => 'Baru',
                 'jumlah' => 10,
                 'foto' => null,
+                'lokasi_posko' => 'Posko Transit Sukajadi (Jl. Sukajadi No. 15, Bandung)',
+                'jadwal_penyerahan' => now()->subDays(2)->format('Y-m-d'),
                 'status' => 'tersedia',
             ],
         ];
@@ -93,6 +105,59 @@ class DatabaseSeeder extends Seeder
                 ['nama_barang' => $item['nama_barang'], 'user_id' => $item['user_id']],
                 $item
             );
+        }
+
+        // 5. Sample Distribusi (PBI-013/014/015)
+        $kalkulator = DonationItem::where('nama_barang', 'like', 'Kalkulator%')->first();
+        if ($kalkulator && Distribution::where('donation_item_id', $kalkulator->id)->doesntExist()) {
+            $dist = Distribution::create([
+                'donation_item_id' => $kalkulator->id,
+                'beneficiary_id' => $beneficiary->id,
+                'status' => 'Dalam Proses Penyaluran',
+                'catatan' => 'Penyaluran ke SDN 03 Bandung untuk kelas 6.',
+                'nomor_resi' => 'TRN-BDG-20261119-001',
+                'processed_by' => $admin->id,
+            ]);
+
+            // Update status barang
+            $kalkulator->update(['status' => 'Dalam Proses Penyaluran']);
+
+            // Histori status
+            DistributionStatusHistory::create([
+                'distribution_id' => $dist->id,
+                'status_before' => null,
+                'status_after' => 'Menunggu Penyaluran',
+                'catatan' => 'Distribusi baru dibuat oleh admin',
+                'changed_by' => $admin->id,
+            ]);
+
+            DistributionStatusHistory::create([
+                'distribution_id' => $dist->id,
+                'status_before' => 'Menunggu Penyaluran',
+                'status_after' => 'Dalam Proses Penyaluran',
+                'catatan' => 'Barang sudah dijemput kurir transit. No. Resi: TRN-BDG-20261119-001',
+                'nomor_resi' => 'TRN-BDG-20261119-001',
+                'changed_by' => $admin->id,
+            ]);
+
+            // Notifikasi sample
+            Notification::create([
+                'user_id' => $donor->id,
+                'title' => 'Barang Donasi Dalam Proses Penyaluran',
+                'message' => 'Barang donasi "Kalkulator Ilmiah & Paket Busur Jangka Geometri" sedang dalam proses penyaluran ke penerima manfaat.',
+                'type' => 'info',
+                'related_type' => 'distribution',
+                'related_id' => $dist->id,
+            ]);
+
+            Notification::create([
+                'user_id' => $beneficiary->id,
+                'title' => 'Barang Donasi Dialokasikan untuk Anda',
+                'message' => 'Barang donasi "Kalkulator Ilmiah & Paket Busur Jangka Geometri" telah dialokasikan untuk Anda. Nomor resi transit: TRN-BDG-20261119-001.',
+                'type' => 'info',
+                'related_type' => 'distribution',
+                'related_id' => $dist->id,
+            ]);
         }
     }
 }
