@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Notifikasi;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -69,6 +70,13 @@ class AdminUserController extends Controller
                 'status_baca'      => 'belum',
                 'created_at'       => now(),
             ]);
+
+            Notification::create([
+                'user_id' => $user->id,
+                'title'   => 'Akun Dinonaktifkan',
+                'message' => 'Akun Anda telah dinonaktifkan oleh tim admin karena pelanggaran ketentuan layanan.',
+                'type'    => 'warning',
+            ]);
         });
 
         return back()->with('success', "Akun {$user->name} berhasil dinonaktifkan (suspended).");
@@ -93,6 +101,13 @@ class AdminUserController extends Controller
                 'pesan'            => 'Akun Anda telah diaktifkan kembali oleh tim admin. Selamat datang kembali di PojokBerbagi!',
                 'status_baca'      => 'belum',
                 'created_at'       => now(),
+            ]);
+
+            Notification::create([
+                'user_id' => $user->id,
+                'title'   => 'Akun Diaktifkan Kembali',
+                'message' => 'Akun Anda telah diaktifkan kembali oleh Tim Posko Transit. Selamat datang kembali di PojokBerbagi!',
+                'type'    => 'success',
             ]);
         });
 
