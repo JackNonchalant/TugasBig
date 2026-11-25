@@ -90,6 +90,11 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::patch('/admin/items/{item}/approve', [AdminItemController::class, 'approve'])->name('admin.items.approve');
         Route::patch('/admin/items/{item}/reject', [AdminItemController::class, 'reject'])->name('admin.items.reject');
 
+        // Verifikasi Kelayakan Barang oleh Tim Posko Transit (PBI-005)
+        Route::patch('/admin/items/{id}/verify', [DonationItemController::class, 'verify'])
+            ->whereNumber('id')
+            ->name('admin.items.verify');
+            
         // Kelola Pengguna (PBI-016, PBI-017, PBI-018)
         Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
         Route::patch('/admin/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');

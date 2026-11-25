@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\DonationItem;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\View\View;
 
 class KatalogController extends Controller
 {
@@ -15,35 +15,22 @@ class KatalogController extends Controller
      */
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('search', $request->query('q', '')));
-        if (mb_strlen($search) > 100) {
-            $search = mb_substr($search, 0, 100);
-        }
+        $page = $request->get('page', 1);
 
-        $page = max(1, (int) $request->query('page', 1));
+        // Kunci cache otomatis berubah jika ada barang baru diposting (PBI-005)
+        $latestStamp = DonationItem::where('status', 'tersedia')->max('updated_at');
+        $totalActive = DonationItem::where('status', 'tersedia')->where('jumlah', '>', 0)->count();
+        $cacheKey = 'katalog_edukasi_p' . $page . '_' . md5($totalActive . '_' . $latestStamp);
 
-        // Jika tidak ada kata kunci pencarian, gunakan cache katalog (PBI-005)
-        if ($search === '') {
-            $latestStamp = DonationItem::available()->max('updated_at');
-            $totalActive = DonationItem::available()->count();
-            $cacheKey = 'katalog_edukasi_p' . $page . '_' . md5($totalActive . '_' . $latestStamp);
-
-            $items = Cache::remember($cacheKey, now()->addMinutes(10), function () {
-                return DonationItem::with('donor')
-                    ->available()
-                    ->latest()
-                    ->paginate(12);
-            });
-        } else {
-            // Pencarian teroptimasi dengan index (status, jumlah, created_at) & parameter binding aman
-            $items = DonationItem::with('donor')
-                ->available()
-                ->search($search)
+        // Caching katalog + fetching data berstatus tersedia + pagination 12 item (PBI-004 & PBI-006)
+        $items = Cache::remember($cacheKey, now()->addMinutes(10), function () {
+            return DonationItem::with('donor')
+                ->where('status', 'tersedia')
+                ->where('jumlah', '>', 0)
                 ->latest()
-                ->paginate(12)
-                ->withQueryString();
-        }
+                ->paginate(12);
+        });
 
-        return view('katalog.index', compact('items', 'search'));
+        return view('katalog.index', compact('items'));
     }
 }

@@ -162,36 +162,6 @@
                         </div>
                     </div>
 
-                    @if (auth()->check() && auth()->user()->isAdmin() && $item->status === 'Menunggu Verifikasi Transit')
-                        <div class="p-4 rounded-xl bg-cream/80 border border-stone-200 space-y-3">
-                            <div>
-                                <div class="text-[11px] font-semibold uppercase tracking-[.14em] text-ochre">Verifikasi Posko Transit</div>
-                                <p class="text-xs text-warm mt-0.5">Setujui agar barang tampil di katalog penerima manfaat, atau tolak jika belum layak pakai.</p>
-                            </div>
-                            <div class="flex flex-col sm:flex-row gap-2.5">
-                                <form method="POST" action="{{ route('admin.items.approve', $item->id) }}" class="flex-1">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit"
-                                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-forest text-paper text-sm font-semibold hover:bg-forest-soft transition duration-300 active:scale-95 cursor-pointer">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                        Setujui &amp; Tayangkan
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ route('admin.items.reject', $item->id) }}" class="sm:w-auto"
-                                      onsubmit="const alasan = prompt('Alasan penolakan (opsional):'); if (alasan === null) return false; this.querySelector('input[name=alasan]').value = alasan; return true;">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="alasan" value="">
-                                    <button type="submit"
-                                            class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 text-sm font-semibold transition-colors cursor-pointer active:scale-95">
-                                        Tolak Barang
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    @endif
-
                     @if (auth()->check() && auth()->user()->isAdmin() && $item->status === 'tersedia')
                         <a href="{{ route('admin.distributions.create', ['item_id' => $item->id]) }}"
                            class="group w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-forest text-paper text-sm font-semibold hover:bg-forest-soft transition duration-300 active:scale-95">

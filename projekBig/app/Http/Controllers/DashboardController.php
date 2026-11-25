@@ -32,17 +32,10 @@ class DashboardController extends Controller
      */
     public function beneficiary(Request $request): View
     {
-        $search = trim((string) $request->query('search', $request->query('q', '')));
-        if (mb_strlen($search) > 100) {
-            $search = mb_substr($search, 0, 100);
-        }
-
-        $items = DonationItem::available()
-            ->search($search)
+        $items = DonationItem::where('status', 'tersedia')
             ->with('donor')
             ->latest()
-            ->paginate(12)
-            ->withQueryString();
+            ->paginate(12);
 
         return view('dashboards.beneficiary', compact('items', 'search'));
     }

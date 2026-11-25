@@ -93,7 +93,7 @@ class DonationItemTest extends TestCase
             'kondisi' => 'Sangat Baik',
             'jumlah' => 3,
             'lokasi_posko' => 'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
-            'status' => 'Menunggu Verifikasi Transit',
+            'status' => 'tersedia',
         ]);
 
         $item = DonationItem::where('nama_barang', 'Kamus Lengkap Bahasa Indonesia')->first();
@@ -214,11 +214,11 @@ class DonationItemTest extends TestCase
 
     /**
      * Acceptance Criteria:
-     * 1. Tetapkan status awal posting menjadi "Menunggu Verifikasi Transit".
+     * 1. Tetapkan status awal posting menjadi "tersedia" agar langsung tampil di katalog.
      * 2. Uji penyimpanan data ke database.
-     * 3. Uji validasi field wajib berdasarkan Acceptance Criteria.
+     * 3. Uji barang yang baru diposting langsung muncul di katalog penerima & katalog publik.
      */
-    public function test_initial_status_is_menunggu_verifikasi_transit_and_validates_required_fields(): void
+    public function test_initial_status_is_tersedia_and_appears_immediately_in_catalogs(): void
     {
         $validData = [
             'nama_barang' => 'Ensiklopedia Sains Anak Bergambar',
@@ -232,7 +232,7 @@ class DonationItemTest extends TestCase
 
         $storeResponse = $this->actingAs($this->donor)->post('/items', $validData);
 
-        // Pastikan tersimpan dengan status 'Menunggu Verifikasi Transit'
+        // Pastikan tersimpan dengan status 'tersedia'
         $this->assertDatabaseHas('donation_items', [
             'user_id' => $this->donor->id,
             'nama_barang' => 'Ensiklopedia Sains Anak Bergambar',
@@ -240,13 +240,23 @@ class DonationItemTest extends TestCase
             'kondisi' => 'Sangat Baik',
             'jumlah' => 1,
             'lokasi_posko' => 'Posko Transit Pusat (Jl. Pendidikan No. 45, Bandung)',
-            'status' => 'Menunggu Verifikasi Transit',
+            'status' => 'tersedia',
         ]);
 
         $item = DonationItem::where('nama_barang', 'Ensiklopedia Sains Anak Bergambar')->first();
-        $this->assertEquals('Menunggu Verifikasi Transit', $item->status);
+        $this->assertEquals('tersedia', $item->status);
         $this->assertNotNull($item->jadwal_penyerahan);
         $storeResponse->assertRedirect(route('items.show', $item->id));
         $storeResponse->assertSessionHas('success');
+
+        // Pastikan langsung muncul di katalog dashboard penerima manfaat
+        $beneficiaryResponse = $this->actingAs($this->beneficiary)->get(route('beneficiary.dashboard'));
+        $beneficiaryResponse->assertStatus(200);
+        $beneficiaryResponse->assertSee('Ensiklopedia Sains Anak Bergambar');
+
+        // Pastikan langsung muncul di halaman katalog barang publik
+        $katalogResponse = $this->actingAs($this->beneficiary)->get(route('katalog.index'));
+        $katalogResponse->assertStatus(200);
+        $katalogResponse->assertSee('Ensiklopedia Sains Anak Bergambar');
     }
 }

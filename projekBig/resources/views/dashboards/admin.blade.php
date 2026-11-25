@@ -345,7 +345,12 @@
                     </tbody>
                 </table>
             </div>
->>>>>>>>> Temporary merge branch 2
+
+            @if ($items->hasPages())
+                <div class="p-4 border-t border-slate-100">
+                    {{ $items->links() }}
+                </div>
+            @endif
         @endif
     </div>
 
