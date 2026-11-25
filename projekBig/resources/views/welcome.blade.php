@@ -96,6 +96,51 @@
                     PojokBerbagi mempertemukan donatur dengan siswa yang membutuhkan buku pelajaran, seragam, dan alat tulis layak pakai. Setiap barang diperiksa Tim Posko Transit sebelum sampai ke tangan penerima.
                 </p>
 
+<<<<<<<<< Temporary merge branch 1
+                {{-- CTA Buttons --}}
+                <div class="mt-8 flex flex-wrap items-center gap-3">
+                    @auth
+                        @if (auth()->user()->isDonor())
+                            <a href="{{ route('items.create') }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Donasikan Barang
+                            </a>
+                            <a href="{{ route('katalog.index') }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
+                                Lihat Katalog Kebutuhan
+                            </a>
+                        @elseif (auth()->user()->isBeneficiary())
+                            <a href="{{ route('beneficiary.dashboard') }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
+                                Jelajahi Katalog Donasi
+                            </a>
+                            <a href="{{ route('katalog.index') }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
+                                Lihat Katalog Kebutuhan
+                            </a>
+                        @elseif (auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
+                                Buka Panel Admin
+                            </a>
+                            <a href="{{ route('katalog.index') }}"
+                               class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
+                                Lihat Katalog Kebutuhan
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('register') }}"
+                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 transition-colors shadow-sm">
+                            Mulai Berbagi Sekarang
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                        <a href="{{ route('katalog.index') }}"
+                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-stone-300 text-stone-700 font-semibold text-sm hover:border-emerald-600 hover:text-emerald-700 transition-colors">
+                            Lihat Katalog Kebutuhan
+                        </a>
+                    @endauth
+=========
                 <div class="rise mt-10 flex flex-wrap items-center gap-3" style="--d:680ms">
                     <a href="{{ $cta[0][1] }}"
                        class="group inline-flex items-center gap-2.5 rounded-xl bg-forest px-6 py-3.5 text-sm font-semibold text-paper transition duration-300 hover:bg-forest-soft active:scale-95">
@@ -107,6 +152,7 @@
                         {{ $cta[1][0] }}
                         <svg class="h-4 w-4 text-warm transition duration-300 group-hover:translate-x-1 group-hover:text-forest" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
                     </a>
+>>>>>>>>> Temporary merge branch 2
                 </div>
             </div>
 
