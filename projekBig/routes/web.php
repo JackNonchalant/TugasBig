@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DistributionController;
+use App\Http\Controllers\DonationHistoryController;
 use App\Http\Controllers\DonationItemController;
 use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\Admin\AdminItemController;
