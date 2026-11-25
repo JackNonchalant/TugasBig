@@ -3,102 +3,81 @@
 @section('title', 'Dashboard Donatur')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <!-- Welcome Banner -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-8 sm:p-10 shadow-lg shadow-emerald-500/15 mb-8">
-        <div class="relative z-10 max-w-2xl">
-            <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur mb-3">
-                Ruang Donatur PojokBerbagi
-            </span>
-            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Halo, {{ auth()->user()->name }}!</h1>
-            <p class="text-emerald-100 text-sm sm:text-base mt-2 leading-relaxed">
-                Terima kasih atas kepedulian Anda. Setiap barang pendidikan yang Anda donasikan membuka jalan harapan belajar bagi anak-anak bangsa.
-            </p>
-            <div class="mt-6 flex flex-wrap items-center gap-4">
-                <a
-                    href="{{ route('items.create') }}"
-                    class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-emerald-700 font-bold text-sm shadow-md hover:bg-emerald-50 transition-all cursor-pointer"
-                >
-                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+<div class="max-w-7xl mx-auto px-5 sm:px-8 py-10 space-y-8">
+    <!-- Welcome Editorial Header -->
+    <div class="rounded-2xl bg-forest text-paper p-7 sm:p-10 border border-forest-soft rise">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div class="max-w-2xl">
+                <p class="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[.18em] text-[#f0a974] mb-3">
+                    <span class="h-px w-8 bg-[#f0a974]"></span>
+                    Ruang Donatur PojokBerbagi
+                </p>
+                <h1 class="font-display text-4xl sm:text-5xl leading-[1.03] tracking-tight">
+                    Halo, <em class="text-[#f0a974]">{{ auth()->user()->name }}.</em>
+                </h1>
+                <p class="text-paper/75 text-sm sm:text-[15px] mt-3 leading-relaxed">
+                    Terima kasih atas kepedulian Anda. Setiap barang pendidikan yang Anda donasikan diperiksa Tim Posko Transit sebelum disalurkan kepada siswa yang membutuhkan.
+                </p>
+            </div>
+            <div class="shrink-0">
+                <a href="{{ route('items.create') }}"
+                   class="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-paper text-forest font-semibold text-sm hover:bg-white transition duration-300 active:scale-95">
+                    Posting Barang Donasi
+                    <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6" />
                     </svg>
-                    Posting Barang Donasi Baru
                 </a>
             </div>
         </div>
-
-        <!-- Decorative Illustration Background -->
-        <div class="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-white/10 pointer-events-none"></div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Donasi</div>
-                <div class="text-3xl font-bold text-slate-900 mt-1">{{ $totalPosted }}</div>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-            </div>
+    <!-- Metric Strip -->
+    <div class="bg-white rounded-2xl border border-stone-200 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-stone-200 rise" style="--d:80ms">
+        <div class="p-6 sm:p-7">
+            <div class="text-[11px] font-semibold text-warm uppercase tracking-[.14em]">Total Donasi</div>
+            <div class="font-display text-4xl text-ink mt-2 leading-none">{{ $totalPosted }}</div>
+            <div class="text-xs text-warm mt-1.5">Semua postingan barang Anda</div>
         </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-                <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Verifikasi Transit</div>
-                <div class="text-3xl font-bold text-amber-600 mt-1">{{ $totalMenungguVerifikasi }}</div>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
+        <div class="p-6 sm:p-7">
+            <div class="text-[11px] font-semibold text-ochre uppercase tracking-[.14em]">Verifikasi Transit</div>
+            <div class="font-display text-4xl text-ochre mt-2 leading-none">{{ $totalMenungguVerifikasi }}</div>
+            <div class="text-xs text-warm mt-1.5">Menunggu pengecekan kelayakan</div>
         </div>
-        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-                <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Tersedia / Siap</div>
-                <div class="text-3xl font-bold text-emerald-600 mt-1">{{ $totalTersedia }}</div>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
+        <div class="p-6 sm:p-7">
+            <div class="text-[11px] font-semibold text-forest uppercase tracking-[.14em]">Tersedia / Siap</div>
+            <div class="font-display text-4xl text-forest mt-2 leading-none">{{ $totalTersedia }}</div>
+            <div class="text-xs text-warm mt-1.5">Sudah tampil di katalog</div>
         </div>
     </div>
 
     <!-- Table of Donor's Items -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden reveal">
+        <div class="p-6 border-b border-stone-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-                <h2 class="text-lg font-bold text-slate-900">Daftar Barang Donasi Saya</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Kelola postingan barang donasi yang telah Anda daftarkan</p>
+                <h2 class="font-display text-2xl text-ink">Daftar Barang Donasi Saya</h2>
+                <p class="text-xs text-warm mt-0.5">Kelola dan pantau status seluruh barang donasi yang telah Anda daftarkan</p>
             </div>
-            <a href="{{ route('items.create') }}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+            <a href="{{ route('items.create') }}" class="group inline-flex items-center gap-1.5 text-xs font-semibold text-forest hover:text-ochre transition-colors">
                 + Tambah Donasi
+                <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
             </a>
         </div>
 
         @if ($items->isEmpty())
-            <div class="p-12 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-500 mx-auto flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                </div>
-                <h3 class="text-base font-bold text-slate-800">Belum Ada Donasi yang Diposting</h3>
-                <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-6">
-                    Mulai posting perlengkapan pendidikan pertama Anda untuk disalurkan ke adik-adik yang membutuhkan.
+            <div class="p-14 text-center">
+                <p class="font-display text-2xl text-ink">Belum ada donasi yang diposting.</p>
+                <p class="text-xs text-warm max-w-sm mx-auto mt-2 mb-6 leading-relaxed">
+                    Mulai posting perlengkapan pendidikan pertama Anda untuk disalurkan kepada siswa yang membutuhkan.
                 </p>
-                <a href="{{ route('items.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold text-xs shadow-md hover:bg-emerald-700 transition-all">
+                <a href="{{ route('items.create') }}" class="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-forest text-paper font-semibold text-xs hover:bg-forest-soft transition duration-300 active:scale-95">
                     Mulai Posting Donasi
+                    <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
                 </a>
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-600">
-                    <thead class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-wider border-b border-slate-100">
+                <table class="w-full text-left text-sm text-warm">
+                    <thead class="bg-paper text-warm uppercase text-[11px] font-semibold tracking-[.12em] border-b border-stone-200">
                         <tr>
                             <th class="px-6 py-4">Barang</th>
                             <th class="px-6 py-4">Kategori</th>
@@ -108,66 +87,60 @@
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-stone-200/80">
                         @foreach ($items as $item)
-                            <tr class="hover:bg-slate-50/60 transition-colors">
+                            <tr class="hover:bg-paper/70 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         @if ($item->foto)
-                                            <img src="{{ $item->foto_url }}" alt="{{ $item->nama_barang }}" class="w-10 h-10 rounded-lg object-cover border border-slate-200">
+                                            <img src="{{ $item->foto_url }}" alt="{{ $item->nama_barang }}" class="w-10 h-10 rounded-lg object-cover border border-stone-200">
                                         @else
-                                            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            <div class="w-10 h-10 rounded-lg bg-cream flex items-center justify-center text-stone-400 border border-stone-200 shrink-0">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
                                             </div>
                                         @endif
                                         <div>
-                                            <a href="{{ route('items.show', $item->id) }}" class="font-bold text-slate-900 hover:text-emerald-600 transition-colors">
+                                            <a href="{{ route('items.show', $item->id) }}" class="font-semibold text-ink hover:text-forest transition-colors">
                                                 {{ $item->nama_barang }}
                                             </a>
-                                            <div class="text-[11px] text-slate-400 flex items-center gap-2">
-                                                <span>Dibuat: {{ $item->created_at->format('d M Y') }}</span>
-                                                @if ($item->jadwal_penyerahan)
-                                                    <span>&bull;</span>
-                                                    <span class="text-amber-700 font-semibold">Serah Terima: {{ $item->jadwal_penyerahan->format('d M Y') }}</span>
-                                                @endif
+                                            <div class="text-[11px] text-slate-400">
+                                                {{ $item->created_at->format('d M Y') }}
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-xs">{{ $item->kategori }}</td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                                    <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-medium bg-paper border border-stone-200 text-ink">
                                         {{ $item->kondisi }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 font-bold text-slate-900">{{ $item->jumlah }}</td>
+                                <td class="px-6 py-4 font-semibold text-ink">{{ $item->jumlah }}</td>
                                 <td class="px-6 py-4">
                                     @if ($item->status === 'Menunggu Verifikasi Transit')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Menunggu Verifikasi Transit
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-ochre animate-pulse"></span>
+                                            Menunggu Verifikasi
                                         </span>
                                     @elseif ($item->status === 'tersedia')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-forest border border-forest/20">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>
                                             Tersedia
                                         </span>
                                     @else
-                                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                                        <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-semibold bg-stone-100 text-ink border border-stone-200">
                                             {{ ucfirst($item->status) }}
                                         </span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a
-                                        href="{{ route('items.show', $item->id) }}"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors"
-                                    >
+                                    <a href="{{ route('items.show', $item->id) }}"
+                                       class="group inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-forest hover:bg-cream transition-colors">
                                         Detail
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </a>
                                 </td>
@@ -178,7 +151,7 @@
             </div>
 
             @if ($items->hasPages())
-                <div class="p-4 border-t border-slate-100">
+                <div class="p-4 border-t border-stone-200">
                     {{ $items->links() }}
                 </div>
             @endif

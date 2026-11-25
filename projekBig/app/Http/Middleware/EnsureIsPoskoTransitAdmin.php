@@ -14,7 +14,7 @@ class EnsureIsPoskoTransitAdmin
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if (!$user || $user->role !== 'Admin') {
+        if (!$user || strtolower((string) $user->role) !== 'admin') {
             abort(403, 'Access denied. Admins only.');
         }
         return $next($request);
