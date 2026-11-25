@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Distribution;
 use App\Models\DonationItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -39,23 +40,62 @@ class DashboardController extends Controller
     }
 
     /**
-     * Admin Dashboard: all items, user counts, and monitoring.
+     * Admin Dashboard: unified view — stats, users, distributions, items.
      */
     public function admin(): View
     {
+        // ── Statistik Global ──────────────────────────────────────────
         $stats = [
-            'total_items' => DonationItem::count(),
+            // Barang Donasi
+            'total_items'               => DonationItem::count(),
             'total_menunggu_verifikasi' => DonationItem::where('status', 'Menunggu Verifikasi Transit')->count(),
-            'total_available' => DonationItem::where('status', 'tersedia')->count(),
-            'total_users' => User::count(),
-            'total_donors' => User::where('role', 'donor')->count(),
-            'total_beneficiaries' => User::where('role', 'beneficiary')->count(),
+            'total_available'           => DonationItem::where('status', 'tersedia')->count(),
+            'total_disalurkan_items'    => DonationItem::where('status', 'Disalurkan')->count(),
+
+            // Pengguna
+            'total_users'               => User::whereIn('role', ['donor','beneficiary'])->count(),
+            'total_donors'              => User::where('role', 'donor')->count(),
+            'total_beneficiaries'       => User::where('role', 'beneficiary')->count(),
+            'total_suspended'           => User::where('status_akun', 'suspended')->count(),
+
+            // Distribusi
+            'total_distributions'       => Distribution::count(),
+            'distributions_menunggu'    => Distribution::where('status', 'Menunggu Penyaluran')->count(),
+            'distributions_proses'      => Distribution::where('status', 'Dalam Proses Penyaluran')->count(),
+            'distributions_selesai'     => Distribution::where('status', 'Disalurkan')->count(),
         ];
 
-        $items = DonationItem::with('donor')
+        // ── Barang Donasi terbaru (5) ─────────────────────────────────
+        $recentItems = DonationItem::with('donor')
             ->latest()
-            ->paginate(15);
+            ->take(5)
+            ->get();
 
-        return view('dashboards.admin', compact('stats', 'items'));
+        // ── Distribusi terbaru (5) ───────────────────────────────────
+        $recentDistributions = Distribution::with(['donationItem', 'beneficiary', 'processor'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // ── Pengguna terbaru (5) ─────────────────────────────────────
+        $recentUsers = User::whereIn('role', ['donor', 'beneficiary'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // ── Akun perlu perhatian (suspended) ─────────────────────────
+        $suspendedUsers = User::where('status_akun', 'suspended')
+            ->whereIn('role', ['donor','beneficiary'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('dashboards.admin', compact(
+            'stats',
+            'recentItems',
+            'recentDistributions',
+            'recentUsers',
+            'suspendedUsers'
+        ));
     }
 }

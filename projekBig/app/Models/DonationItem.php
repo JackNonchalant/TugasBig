@@ -55,6 +55,22 @@ class DonationItem extends Model
     }
 
     /**
+     * Get distributions for this donation item.
+     */
+    public function distributions()
+    {
+        return $this->hasMany(Distribution::class, 'donation_item_id');
+    }
+
+    /**
+     * Get the latest/active distribution.
+     */
+    public function latestDistribution()
+    {
+        return $this->hasOne(Distribution::class, 'donation_item_id')->latestOfMany();
+    }
+
+    /**
      * Helper to get public URL of the item photo.
      */
     public function getFotoUrlAttribute(): ?string

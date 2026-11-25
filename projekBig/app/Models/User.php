@@ -19,10 +19,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nama_lengkap',
         'email',
-        'password',
+        'password_hash',
+        'no_telepon',
         'role',
+        'alamat',
+        'status_akun',
     ];
 
     /**
@@ -31,6 +34,22 @@ class User extends Authenticatable
     public function donationItems()
     {
         return $this->hasMany(DonationItem::class, 'user_id');
+    }
+
+    /**
+     * Get notifications for this user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get unread notifications count.
+     */
+    public function unreadNotificationsCount(): int
+    {
+        return $this->notifications()->whereNull('read_at')->count();
     }
 
     /**
