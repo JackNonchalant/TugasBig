@@ -105,7 +105,7 @@
                                             <a href="{{ route('items.show', $item->id) }}" class="font-semibold text-ink hover:text-forest transition-colors">
                                                 {{ $item->nama_barang }}
                                             </a>
-                                            <div class="text-[11px] text-stone-400">
+                                            <div class="text-[11px] text-slate-400">
                                                 {{ $item->created_at->format('d M Y') }}
                                             </div>
                                         </div>

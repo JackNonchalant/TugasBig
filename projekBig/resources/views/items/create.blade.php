@@ -159,6 +159,69 @@
                         @enderror
                     </div>
 
+                    <!-- Pemilihan Lokasi Posko Transit & Tanggal Penyerahan -->
+                    <div class="p-5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-5">
+                        <div class="flex items-center gap-2 pb-3 border-b border-amber-200/80">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900">Lokasi Posko Transit & Jadwal Penyerahan</h3>
+                                <p class="text-[11px] text-slate-500">Tentukan posko transit terdekat dan tanggal serah terima barang untuk verifikasi</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Lokasi Posko Transit -->
+                            <div>
+                                <label for="lokasi_posko" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    Pilih Posko Transit <span class="text-red-500">*</span>
+                                </label>
+                                <select
+                                    name="lokasi_posko"
+                                    id="lokasi_posko"
+                                    required
+                                    class="block w-full px-4 py-2.5 bg-white border @error('lokasi_posko') border-red-300 ring-1 ring-red-300 @else border-slate-200 @enderror rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                >
+                                    <option value="">-- Pilih Posko Transit --</option>
+                                    @foreach ($poskoTransitList as $posko)
+                                        <option value="{{ $posko }}" {{ old('lokasi_posko') === $posko ? 'selected' : '' }}>
+                                            {{ $posko }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('lokasi_posko')
+                                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Tanggal Penyerahan -->
+                            <div>
+                                <label for="jadwal_penyerahan" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    Tanggal Penyerahan <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    name="jadwal_penyerahan"
+                                    id="jadwal_penyerahan"
+                                    min="{{ date('Y-m-d') }}"
+                                    value="{{ old('jadwal_penyerahan', date('Y-m-d', strtotime('+1 day'))) }}"
+                                    required
+                                    class="block w-full px-4 py-2.5 bg-white border @error('jadwal_penyerahan') border-red-300 ring-1 ring-red-300 @else border-slate-200 @enderror rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                                >
+                                @error('jadwal_penyerahan')
+                                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-amber-800/80 bg-amber-100/60 p-2.5 rounded-lg">
+                            Barang yang diserahkan ke posko transit akan diperiksa fisiknya oleh petugas sebelum disalurkan ke penerima manfaat.
+                        </p>
+                    </div>
+
                     <!-- Foto Barang -->
                     <div>
                         <label for="foto" class="block text-[11px] font-semibold text-warm uppercase tracking-[.14em] mb-2">

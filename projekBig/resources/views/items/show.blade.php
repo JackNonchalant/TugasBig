@@ -120,6 +120,29 @@
                             {{ $item->deskripsi }}
                         </div>
                     </div>
+
+                    <!-- Informasi Posko Transit & Jadwal Penyerahan -->
+                    <div class="mb-6 p-4 rounded-2xl bg-amber-50/70 border border-amber-200">
+                        <div class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Informasi Posko Transit & Jadwal Penyerahan
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="bg-white p-3 rounded-xl border border-amber-100">
+                                <span class="text-slate-500 block mb-0.5">Titik Lokasi Posko Transit:</span>
+                                <span class="font-bold text-slate-800">{{ $item->lokasi_posko ?? 'Posko Belum Ditentukan' }}</span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-amber-100">
+                                <span class="text-slate-500 block mb-0.5">Jadwal Tanggal Penyerahan:</span>
+                                <span class="font-bold text-slate-800">
+                                    {{ $item->jadwal_penyerahan ? $item->jadwal_penyerahan->format('d M Y') : 'Belum Ditentukan' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Donor Information Box -->
